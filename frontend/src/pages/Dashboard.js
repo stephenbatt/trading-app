@@ -287,19 +287,22 @@ const Dashboard = () => {
           </div>
 
           {/* Strategy Toggle */}
-          <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700">
-            <Power className={`h-4 w-4 ${userSettings.strategy_enabled ? 'text-green-500' : 'text-zinc-500'}`} />
-            <Label htmlFor="strategy-toggle" className="text-sm text-zinc-300">
-              Strategy
-            </Label>
-            <Switch
-              id="strategy-toggle"
-              checked={userSettings.strategy_enabled}
-              onCheckedChange={handleToggleStrategy}
-              data-testid="strategy-toggle"
-            />
-          </div>
-        </div>
+              {/* Strategy Toggle */}
+              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700">
+                <Power className={`h-4 w-4 ${userSettings.strategy_enabled ? 'text-green-500' : 'text-zinc-500'}`} />
+                <Label htmlFor="strategy-toggle" className="text-sm text-zinc-300">
+                  Strategy
+                </Label>
+                <Switch
+                  id="strategy-toggle"
+                  checked={userSettings.strategy_enabled}
+                  onCheckedChange={handleToggleStrategy}
+                  data-testid="strategy-toggle"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Price Header */}
         <Card className="bg-zinc-900 border-zinc-800">
