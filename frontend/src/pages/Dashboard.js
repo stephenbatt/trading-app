@@ -367,14 +367,13 @@ const Dashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-0">
+              <CardContent className="p-2">
                 {loading ? (
                   <Skeleton className="h-[400px] w-full" />
                 ) : (
-                  <div data-testid="candlestick-chart">
+                  <div data-testid="candlestick-chart" className="chart-container">
                     <TradingChart 
                       data={stockData?.candles || []} 
-                      emaSettings={userSettings}
                       height={400} 
                     />
                   </div>
