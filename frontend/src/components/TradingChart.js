@@ -46,7 +46,7 @@ const TradingChart = ({ data, emaSettings, height = 400 }) => {
       },
       timeScale: {
         borderColor: '#27272A',
-        timeVisible: true,
+        timeVisible: false,
       },
     });
 
