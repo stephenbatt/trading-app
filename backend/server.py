@@ -219,7 +219,7 @@ def calculate_macd(prices: List[float], fast: int = 12, slow: int = 26, signal: 
 
 # ==================== SAMPLE DATA GENERATION ====================
 
-def generate_sample_stock_data(symbol: str, days: int = 100) -> List[Dict]:
+def generate_sample_stock_data(symbol: str, days: int = 300) -> List[Dict]:
     """Generate realistic sample stock data for testing when API unavailable"""
     import random
     
