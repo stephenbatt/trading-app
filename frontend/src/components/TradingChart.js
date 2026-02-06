@@ -84,9 +84,9 @@ const TradingChart = ({ data, emaSettings, height = 400 }) => {
       lastValueVisible: true,
     });
 
-    // Convert data to chart format
+    // Convert data to chart format - use YYYY-MM-DD string format directly
     const candleData = data.map(candle => ({
-      time: candle.time,
+      time: candle.time, // Keep as YYYY-MM-DD string
       open: candle.open,
       high: candle.high,
       low: candle.low,
@@ -96,21 +96,21 @@ const TradingChart = ({ data, emaSettings, height = 400 }) => {
     const fastEmaData = data
       .filter(c => c.fast_ema !== null && c.fast_ema !== undefined)
       .map(c => ({
-        time: c.time,
+        time: c.time, // Keep as YYYY-MM-DD string
         value: c.fast_ema,
       }));
 
     const midEmaData = data
       .filter(c => c.mid_ema !== null && c.mid_ema !== undefined)
       .map(c => ({
-        time: c.time,
+        time: c.time, // Keep as YYYY-MM-DD string
         value: c.mid_ema,
       }));
 
     const slowEmaData = data
       .filter(c => c.slow_ema !== null && c.slow_ema !== undefined)
       .map(c => ({
-        time: c.time,
+        time: c.time, // Keep as YYYY-MM-DD string
         value: c.slow_ema,
       }));
 
