@@ -150,6 +150,9 @@ const Dashboard = () => {
       const result = await paperTrades.close(tradeId, 'manual');
       toast.success(`Trade closed. P/L: ${formatPrice(result.data.profit_loss)}`);
       setOpenTrades(prev => prev.filter(t => t.id !== tradeId));
+      // Refresh all trades to update bankroll
+      const allResponse = await paperTrades.getAll();
+      setAllTrades(allResponse.data.trades);
     } catch (error) {
       toast.error('Failed to close trade');
     }
@@ -176,6 +179,75 @@ const Dashboard = () => {
   return (
     <Layout>
       <div className="p-4 space-y-4">
+        {/* Bankroll Stats Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Wallet className="h-4 w-4 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Balance</p>
+                <p className={`font-mono text-lg font-bold ${getPriceChangeColor(totalPnL)}`} data-testid="current-balance">
+                  {formatPrice(currentBalance)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${totalPnL >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                <DollarSign className={`h-4 w-4 ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`} />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Total P/L</p>
+                <p className={`font-mono text-lg font-bold ${getPriceChangeColor(totalPnL)}`} data-testid="total-pnl">
+                  {totalPnL >= 0 ? '+' : ''}{formatPrice(totalPnL)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <Target className="h-4 w-4 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Win Rate</p>
+                <p className={`font-mono text-lg font-bold ${winRate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                  {winRate.toFixed(0)}%
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-500/10">
+                <Trophy className="h-4 w-4 text-green-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Wins</p>
+                <p className="font-mono text-lg font-bold text-green-400">{winningTrades.length}</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-zinc-900 border-zinc-800">
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-red-500/10">
+                <TrendingDown className="h-4 w-4 text-red-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Losses</p>
+                <p className="font-mono text-lg font-bold text-red-400">{losingTrades.length}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Top Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
