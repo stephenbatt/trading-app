@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createChart, ColorType, CrosshairMode } from 'lightweight-charts';
 
 const TradingChart = ({ data, emaSettings, height = 400 }) => {
@@ -46,17 +46,14 @@ const TradingChart = ({ data, emaSettings, height = 400 }) => {
         borderColor: '#27272A',
         timeVisible: true,
         secondsVisible: false,
-        tickMarkFormatter: (time) => {
-          const date = new Date(time * 1000);
-          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        },
       },
       handleScroll: { vertTouchDrag: true },
       handleScale: { axisPressedMouseMove: true },
     });
 
-    // Candlestick series
-    const candleSeries = chart.addCandlestickSeries({
+    // Use the new v5 API for candlestick series
+    const candleSeries = chart.addSeries({
+      type: 'Candlestick',
       upColor: '#22C55E',
       downColor: '#EF4444',
       borderUpColor: '#22C55E',
@@ -65,8 +62,9 @@ const TradingChart = ({ data, emaSettings, height = 400 }) => {
       wickDownColor: '#EF4444',
     });
 
-    // EMA lines
-    const fastEmaSeries = chart.addLineSeries({
+    // EMA lines using new v5 API
+    const fastEmaSeries = chart.addSeries({
+      type: 'Line',
       color: '#F59E0B',
       lineWidth: 2,
       title: 'Fast EMA',
@@ -74,7 +72,8 @@ const TradingChart = ({ data, emaSettings, height = 400 }) => {
       lastValueVisible: true,
     });
 
-    const midEmaSeries = chart.addLineSeries({
+    const midEmaSeries = chart.addSeries({
+      type: 'Line',
       color: '#8B5CF6',
       lineWidth: 2,
       title: 'Mid EMA',
@@ -82,7 +81,8 @@ const TradingChart = ({ data, emaSettings, height = 400 }) => {
       lastValueVisible: true,
     });
 
-    const slowEmaSeries = chart.addLineSeries({
+    const slowEmaSeries = chart.addSeries({
+      type: 'Line',
       color: '#EC4899',
       lineWidth: 2,
       title: 'Slow EMA',
