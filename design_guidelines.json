@@ -1,0 +1,168 @@
+{
+  "identity": {
+    "name": "E1",
+    "role": "Creative Designer (Top 1%)",
+    "mission": "Create a professional, high-performance trading terminal that blends Bloomberg precision with Cyberpunk aesthetics.",
+    "principles": [
+      "Fusion over Imitation: Mix Fintech precision with Sci-Fi HUD aesthetics.",
+      "Emotion First: Evoke focus, speed, and control.",
+      "Content is King: Data is the hero. Charts and metrics take center stage.",
+      "Negative Space: Use dense grids for data, but breathe in navigation.",
+      "Contrast: High contrast for critical data (Price, P/L), low contrast for structure."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "headings": {
+        "family": "Manrope",
+        "weights": ["600", "700", "800"],
+        "usage": "Page titles, Section headers, Modal titles"
+      },
+      "body": {
+        "family": "Inter",
+        "weights": ["400", "500"],
+        "usage": "General UI text, labels, descriptions"
+      },
+      "data": {
+        "family": "JetBrains Mono",
+        "weights": ["400", "500", "700"],
+        "usage": "Prices, Tickers, P/L, Code snippets, Logs"
+      }
+    },
+    "rules": [
+      "Use 'JetBrains Mono' for ALL numerical data and ticker symbols.",
+      "Headings must be 'tracking-tight'.",
+      "Data labels (e.g., 'OPEN', 'HIGH') should be uppercase, text-xs, and tracking-wider."
+    ]
+  },
+  "colors": {
+    "theme": "dark",
+    "palette": {
+      "background": {
+        "default": "#09090B",
+        "paper": "#18181B",
+        "subtle": "#27272A"
+      },
+      "primary": {
+        "main": "#22C55E",
+        "hover": "#16A34A",
+        "description": "Used for Buy actions, Profit, and Positive indicators."
+      },
+      "destructive": {
+        "main": "#EF4444",
+        "hover": "#DC2626",
+        "description": "Used for Sell actions, Loss, and Negative indicators."
+      },
+      "accent": {
+        "main": "#3B82F6",
+        "glow": "rgba(59, 130, 246, 0.5)",
+        "description": "Used for active states, selection, and focus."
+      },
+      "chart": {
+        "candle_up": "#22C55E",
+        "candle_down": "#EF4444",
+        "cci_line": "#06B6D4",
+        "ema_fast": "#F59E0B",
+        "ema_mid": "#8B5CF6",
+        "ema_slow": "#EC4899"
+      },
+      "text": {
+        "primary": "#FAFAFA",
+        "secondary": "#A1A1AA",
+        "muted": "#52525B"
+      },
+      "border": {
+        "default": "#27272A",
+        "active": "#3F3F46"
+      }
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "dashboard": "Bento Grid Mode B (High Density)",
+      "columns": "grid-cols-12",
+      "gap": "gap-2 md:gap-4",
+      "padding": "p-4 md:p-6"
+    },
+    "spacing": {
+      "container_padding": "p-4 md:p-6",
+      "section_gap": "gap-6",
+      "widget_gap": "gap-4"
+    },
+    "containers": {
+      "card": "bg-card border border-border rounded-lg shadow-sm",
+      "panel": "bg-background/50 backdrop-blur-md border border-border/50"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_10px_rgba(34,197,94,0.3)]",
+      "destructive": "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-[0_0_10px_rgba(239,68,68,0.3)]",
+      "outline": "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+      "ghost": "hover:bg-accent hover:text-accent-foreground"
+    },
+    "inputs": {
+      "default": "bg-background border-input focus:ring-2 focus:ring-accent focus:border-transparent font-mono"
+    },
+    "cards": {
+      "default": "bg-card text-card-foreground border border-border shadow-sm",
+      "glass": "bg-black/40 backdrop-blur-xl border border-white/10"
+    },
+    "charts": {
+      "container": "w-full h-full min-h-[300px] rounded-lg border border-border bg-black/20 overflow-hidden relative",
+      "tooltip": "bg-popover text-popover-foreground border border-border rounded shadow-md text-xs font-mono"
+    }
+  },
+  "visual_enhancers": {
+    "glow_effects": {
+      "success": "shadow-[0_0_15px_rgba(34,197,94,0.4)]",
+      "danger": "shadow-[0_0_15px_rgba(239,68,68,0.4)]",
+      "info": "shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+    },
+    "textures": {
+      "scanlines": "background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255, 255, 255, 0.03) 2px, transparent 3px); pointer-events: none; position: absolute; inset: 0; z-index: 10;",
+      "grid_bg": "background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 20px 20px;"
+    },
+    "animations": {
+      "pulse": "animate-pulse",
+      "trace": "Use framer-motion to animate borders on active panels."
+    }
+  },
+  "assets": {
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px, size 16px or 20px"
+    },
+    "images": {
+      "login_bg": {
+        "url": "https://images.unsplash.com/photo-1647067517631-aa36cda58a17?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMHN0b2NrJTIwbWFya2V0JTIwZGF0YSUyMHZpc3VhbGl6YXRpb24lMjBkYXJrJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzAzMzYyMjF8MA&ixlib=rb-4.1.0&q=85",
+        "alt": "Abstract data visualization",
+        "usage": "Background for Login/Register pages with heavy overlay (bg-black/80)"
+      },
+      "dashboard_empty_state": {
+        "url": "https://images.unsplash.com/photo-1613205130185-6a39e31e8b25?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMHN0b2NrJTIwbWFya2V0JTIwZGF0YSUyMHZpc3VhbGl6YXRpb24lMjBkYXJrJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzAzMzYyMjF8MA&ixlib=rb-4.1.0&q=85",
+        "alt": "Abstract blue waves",
+        "usage": "Empty state or placeholder for charts"
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "Implement a 'Dark Mode' first approach. The app should feel native to a dark environment.",
+    "Use 'recharts' for all charting needs. Customize the default tooltips and axes to match the 'JetBrains Mono' aesthetic.",
+    "For the CCI Indicator, create a custom Recharts component that looks like an oscilloscope (green line, dark grid, glowing effect).",
+    "The 'EMA Backtester' should use a table with sortable columns. Use Shadcn Table component.",
+    "Ensure all inputs in the 'Order Entry' panel are large enough for touch targets but dense enough for desktop efficiency.",
+    "Use 'sonner' for all trade notifications (Order Filled, Stop Loss Hit).",
+    "Strictly follow the 'Bento Grid' layout for the dashboard. Do not leave large empty spaces.",
+    "Add 'data-testid' to all interactive elements (buttons, inputs, toggles) for testing."
+  ],
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds, use solid dark colors with subtle borders.",
+    "Avoid 'Inter' for headings; use 'Manrope'.",
+    "Use 'JetBrains Mono' for all numbers and financial data.",
+    "Ensure contrast ratios meet WCAG AA standards, especially for red/green text on dark backgrounds.",
+    "Use 'lucide-react' for icons.",
+    "Do not use generic AI emojis.",
+    "Implement micro-interactions on all buttons (hover scale, brightness boost)."
+  ]
+}
