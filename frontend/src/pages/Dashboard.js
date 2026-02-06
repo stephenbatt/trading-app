@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { stocks, paperTrades, settings as settingsApi } from '../lib/api';
 import Layout from '../components/Layout';
-import TradingChart from '../components/ProfessionalChart';
+import TradingChart from '../components/CandlestickChart';
 import CCIChart from '../components/CCIChart';
 import MACDChart from '../components/MACDChart';
 import { Button } from '../components/ui/button';
