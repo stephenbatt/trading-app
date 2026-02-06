@@ -8,55 +8,64 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Cell,
 } from 'recharts';
-import { formatPrice, formatDate } from '../lib/utils';
 
-// Custom candlestick shape
-const CandlestickShape = (props) => {
-  const { x, y, width, height, payload } = props;
-  if (!payload) return null;
+// Professional candlestick bar shape
+const Candlestick = (props) => {
+  const { x, y, width, height, payload, yAxisScale } = props;
+  if (!payload || !yAxisScale) return null;
 
   const { open, close, high, low } = payload;
-  const isGreen = close >= open;
-  const color = isGreen ? '#22C55E' : '#EF4444';
+  const isUp = close >= open;
   
-  const bodyTop = Math.min(open, close);
-  const bodyBottom = Math.max(open, close);
-  const priceRange = props.yAxis?.scale?.domain?.() || [low, high];
-  const chartHeight = props.background?.height || 300;
+  // Colors - ThinkorSwim style
+  const upColor = '#26A69A';
+  const downColor = '#EF5350';
+  const color = isUp ? upColor : downColor;
   
-  // Calculate Y positions based on price scale
-  const getY = (price) => {
-    const [minPrice, maxPrice] = priceRange;
-    const ratio = (maxPrice - price) / (maxPrice - minPrice);
-    return ratio * chartHeight;
-  };
+  // Calculate positions using the Y-axis scale
+  const openY = yAxisScale(open);
+  const closeY = yAxisScale(close);
+  const highY = yAxisScale(high);
+  const lowY = yAxisScale(low);
   
+  // Body dimensions - THICK bodies
+  const bodyWidth = Math.max(width * 0.85, 6);
+  const bodyX = x + (width - bodyWidth) / 2;
+  const bodyTop = Math.min(openY, closeY);
+  const bodyHeight = Math.max(Math.abs(closeY - openY), 1);
+  
+  // Wick position - THIN wicks
   const wickX = x + width / 2;
-  const candleWidth = Math.max(width * 0.8, 4);
-  const candleX = x + (width - candleWidth) / 2;
-  
-  const bodyHeight = Math.max(Math.abs(getY(bodyTop) - getY(bodyBottom)), 1);
-  const bodyY = getY(bodyBottom);
 
   return (
     <g>
-      {/* Wick */}
+      {/* Upper wick - thin */}
       <line
         x1={wickX}
         x2={wickX}
-        y1={getY(high)}
-        y2={getY(low)}
+        y1={highY}
+        y2={bodyTop}
         stroke={color}
         strokeWidth={1}
       />
-      {/* Body */}
+      {/* Lower wick - thin */}
+      <line
+        x1={wickX}
+        x2={wickX}
+        y1={bodyTop + bodyHeight}
+        y2={lowY}
+        stroke={color}
+        strokeWidth={1}
+      />
+      {/* Body - thick, filled */}
       <rect
-        x={candleX}
-        y={bodyY}
-        width={candleWidth}
+        x={bodyX}
+        y={bodyTop}
+        width={bodyWidth}
         height={bodyHeight}
-        fill={isGreen ? color : color}
+        fill={color}
         stroke={color}
         strokeWidth={1}
       />
@@ -64,154 +73,219 @@ const CandlestickShape = (props) => {
   );
 };
 
-const CustomTooltip = ({ active, payload }) => {
+// Custom tooltip - Professional dark style
+const ProfessionalTooltip = ({ active, payload }) => {
   if (!active || !payload || !payload[0]) return null;
 
   const data = payload[0].payload;
-  const isGreen = data.close >= data.open;
+  const isUp = data.close >= data.open;
   const changePercent = ((data.close - data.open) / data.open * 100).toFixed(2);
 
   return (
-    <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-xl">
-      <p className="text-xs text-zinc-400 mb-2 font-mono">{data.time}</p>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono">
-        <span className="text-zinc-500">O</span>
-        <span className="text-white">{formatPrice(data.open)}</span>
-        <span className="text-zinc-500">H</span>
-        <span className="text-white">{formatPrice(data.high)}</span>
-        <span className="text-zinc-500">L</span>
-        <span className="text-white">{formatPrice(data.low)}</span>
-        <span className="text-zinc-500">C</span>
-        <span className={isGreen ? 'text-green-500' : 'text-red-500'}>
-          {formatPrice(data.close)}
+    <div className="bg-[#1E222D] border border-[#2A2E39] rounded-lg p-3 shadow-2xl min-w-[180px]">
+      <div className="text-[#787B86] text-xs mb-2 font-medium">{data.time}</div>
+      
+      {/* OHLC Grid */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        <span className="text-[#787B86]">Open</span>
+        <span className="text-white font-mono text-right">${data.open?.toFixed(2)}</span>
+        <span className="text-[#787B86]">High</span>
+        <span className="text-[#26A69A] font-mono text-right">${data.high?.toFixed(2)}</span>
+        <span className="text-[#787B86]">Low</span>
+        <span className="text-[#EF5350] font-mono text-right">${data.low?.toFixed(2)}</span>
+        <span className="text-[#787B86]">Close</span>
+        <span className={`font-mono text-right ${isUp ? 'text-[#26A69A]' : 'text-[#EF5350]'}`}>
+          ${data.close?.toFixed(2)}
         </span>
       </div>
-      <div className={`mt-2 pt-2 border-t border-zinc-700 text-xs font-mono ${isGreen ? 'text-green-500' : 'text-red-500'}`}>
-        {isGreen ? '+' : ''}{changePercent}%
+      
+      {/* Change */}
+      <div className={`mt-2 pt-2 border-t border-[#2A2E39] text-sm font-mono ${isUp ? 'text-[#26A69A]' : 'text-[#EF5350]'}`}>
+        {isUp ? '▲' : '▼'} {changePercent}%
       </div>
-      {data.fast_ema && (
-        <div className="mt-2 pt-2 border-t border-zinc-700 text-xs font-mono space-y-1">
-          <div className="flex justify-between">
-            <span className="text-amber-500">Fast EMA</span>
-            <span className="text-white">{formatPrice(data.fast_ema)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-purple-500">Mid EMA</span>
-            <span className="text-white">{formatPrice(data.mid_ema)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-pink-500">Slow EMA</span>
-            <span className="text-white">{formatPrice(data.slow_ema)}</span>
-          </div>
+      
+      {/* EMA Values */}
+      {(data.fast_ema || data.mid_ema || data.slow_ema) && (
+        <div className="mt-2 pt-2 border-t border-[#2A2E39] space-y-1 text-xs">
+          {data.fast_ema && (
+            <div className="flex justify-between">
+              <span className="text-[#F7931A]">Fast EMA</span>
+              <span className="text-white font-mono">${data.fast_ema?.toFixed(2)}</span>
+            </div>
+          )}
+          {data.mid_ema && (
+            <div className="flex justify-between">
+              <span className="text-[#9B59B6]">Mid EMA</span>
+              <span className="text-white font-mono">${data.mid_ema?.toFixed(2)}</span>
+            </div>
+          )}
+          {data.slow_ema && (
+            <div className="flex justify-between">
+              <span className="text-[#E91E8C]">Slow EMA</span>
+              <span className="text-white font-mono">${data.slow_ema?.toFixed(2)}</span>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Volume */}
+      {data.volume && (
+        <div className="mt-2 pt-2 border-t border-[#2A2E39] flex justify-between text-xs">
+          <span className="text-[#787B86]">Volume</span>
+          <span className="text-white font-mono">{(data.volume / 1000000).toFixed(2)}M</span>
         </div>
       )}
     </div>
   );
 };
 
-const CandlestickChart = ({ data, height = 400 }) => {
+const CandlestickChart = ({ data, height = 450 }) => {
   const chartData = useMemo(() => {
     if (!data || !data.length) return [];
     return data.map((candle, index) => ({
       ...candle,
       index,
-      candleValue: Math.max(candle.high, candle.open, candle.close),
+      // For bar rendering
+      candleRange: Math.max(candle.high, candle.open, candle.close),
     }));
   }, [data]);
 
-  const domain = useMemo(() => {
-    if (!chartData.length) return [0, 100];
-    const prices = chartData.flatMap(c => [c.high, c.low]);
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-    const padding = (max - min) * 0.05;
-    return [min - padding, max + padding];
-  }, [chartData]);
+  const { domain, yAxisScale } = useMemo(() => {
+    if (!chartData.length) return { domain: [0, 100], yAxisScale: null };
+    
+    const allPrices = chartData.flatMap(c => [c.high, c.low, c.fast_ema, c.mid_ema, c.slow_ema].filter(Boolean));
+    const minPrice = Math.min(...allPrices);
+    const maxPrice = Math.max(...allPrices);
+    const padding = (maxPrice - minPrice) * 0.08;
+    const domain = [minPrice - padding, maxPrice + padding];
+    
+    // Create scale function for candlesticks
+    const yAxisScale = (value) => {
+      const [min, max] = domain;
+      const chartHeight = height - 40; // Account for margins
+      return ((max - value) / (max - min)) * chartHeight + 20;
+    };
+    
+    return { domain, yAxisScale };
+  }, [chartData, height]);
 
   if (!chartData.length) {
     return (
-      <div className="h-full flex items-center justify-center text-zinc-500">
-        No data available
+      <div className="h-full flex items-center justify-center text-[#787B86] bg-[#131722]">
+        Loading chart data...
       </div>
     );
   }
 
+  // Current price for price line
+  const currentPrice = chartData[chartData.length - 1]?.close;
+
   return (
-    <div className="relative" style={{ height }}>
+    <div className="relative bg-[#131722] rounded-lg overflow-hidden" style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={chartData}
-          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+          margin={{ top: 20, right: 60, left: 10, bottom: 20 }}
         >
+          {/* Grid */}
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(42, 46, 57, 0.5)" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+          
           <XAxis
             dataKey="time"
-            axisLine={{ stroke: '#27272A' }}
-            tickLine={{ stroke: '#27272A' }}
-            tick={{ fill: '#71717A', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+            axisLine={{ stroke: '#2A2E39' }}
+            tickLine={{ stroke: '#2A2E39' }}
+            tick={{ fill: '#787B86', fontSize: 10, fontFamily: 'Inter, sans-serif' }}
             interval="preserveStartEnd"
-            tickFormatter={(value) => value?.split('-').slice(1).join('/')}
+            tickFormatter={(value) => {
+              const parts = value?.split('-');
+              return parts ? `${parts[1]}/${parts[2]}` : '';
+            }}
           />
           <YAxis
             domain={domain}
-            axisLine={{ stroke: '#27272A' }}
-            tickLine={{ stroke: '#27272A' }}
-            tick={{ fill: '#71717A', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-            tickFormatter={(value) => value?.toFixed(0)}
+            axisLine={{ stroke: '#2A2E39' }}
+            tickLine={{ stroke: '#2A2E39' }}
+            tick={{ fill: '#787B86', fontSize: 10, fontFamily: 'Inter, sans-serif' }}
+            tickFormatter={(value) => `$${value?.toFixed(0)}`}
             orientation="right"
+            width={55}
           />
-          <Tooltip content={<CustomTooltip />} />
           
-          {/* Candlesticks rendered as bars */}
+          <Tooltip content={<ProfessionalTooltip />} />
+          
+          {/* Current price line */}
+          <ReferenceLine
+            y={currentPrice}
+            stroke="#2962FF"
+            strokeWidth={1}
+            strokeDasharray="4 2"
+            label={{
+              value: `$${currentPrice?.toFixed(2)}`,
+              position: 'right',
+              fill: '#2962FF',
+              fontSize: 10,
+              fontFamily: 'JetBrains Mono',
+            }}
+          />
+          
+          {/* Candlesticks */}
           <Bar
-            dataKey="candleValue"
-            shape={<CandlestickShape />}
+            dataKey="candleRange"
+            shape={(props) => <Candlestick {...props} yAxisScale={yAxisScale} />}
             isAnimationActive={false}
           />
           
-          {/* EMA Lines */}
+          {/* EMA Lines - Professional colors */}
           <Line
             type="monotone"
             dataKey="fast_ema"
-            stroke="#F59E0B"
+            stroke="#F7931A"
             dot={false}
-            strokeWidth={1.5}
+            strokeWidth={2}
             connectNulls
-            name="Fast EMA"
+            isAnimationActive={false}
           />
           <Line
             type="monotone"
             dataKey="mid_ema"
-            stroke="#8B5CF6"
+            stroke="#9B59B6"
             dot={false}
-            strokeWidth={1.5}
+            strokeWidth={2}
+            strokeDasharray="6 3"
             connectNulls
-            name="Mid EMA"
+            isAnimationActive={false}
           />
           <Line
             type="monotone"
             dataKey="slow_ema"
-            stroke="#EC4899"
+            stroke="#E91E8C"
             dot={false}
             strokeWidth={2}
+            strokeDasharray="6 3"
             connectNulls
-            name="Slow EMA"
+            isAnimationActive={false}
           />
         </ComposedChart>
       </ResponsiveContainer>
       
-      {/* Legend */}
-      <div className="absolute top-2 left-2 flex items-center gap-4 text-xs font-mono">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-0.5 bg-amber-500"></div>
-          <span className="text-amber-500">Fast</span>
+      {/* EMA Legend - Professional style */}
+      <div className="absolute top-3 left-3 flex items-center gap-4 text-xs z-10 bg-[#131722]/95 px-4 py-2 rounded border border-[#2A2E39]">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-0.5 bg-[#F7931A]"></div>
+          <span className="text-[#F7931A] font-medium">Fast EMA</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-0.5 bg-purple-500"></div>
-          <span className="text-purple-500">Mid</span>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-0.5 border-t-2 border-dashed border-[#9B59B6]"></div>
+          <span className="text-[#9B59B6] font-medium">Mid EMA</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-0.5 bg-pink-500"></div>
-          <span className="text-pink-500">Slow</span>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-0.5 border-t-2 border-dashed border-[#E91E8C]"></div>
+          <span className="text-[#E91E8C] font-medium">Slow EMA</span>
         </div>
       </div>
     </div>
