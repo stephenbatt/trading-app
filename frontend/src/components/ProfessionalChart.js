@@ -14,19 +14,19 @@ const ProfessionalChart = ({ data, height = 450 }) => {
       chartRef.current = null;
     }
 
-    // Create chart with professional dark theme
+    // Create chart with professional dark theme (TradingView style)
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: height,
       layout: {
-        background: { color: '#131722' },
+        backgroundColor: '#131722',
         textColor: '#787B86',
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "'Inter', sans-serif",
         fontSize: 12,
       },
       grid: {
-        vertLines: { color: 'rgba(42, 46, 57, 0.5)', style: 1 },
-        horzLines: { color: 'rgba(42, 46, 57, 0.5)', style: 1 },
+        vertLines: { color: 'rgba(42, 46, 57, 0.5)' },
+        horzLines: { color: 'rgba(42, 46, 57, 0.5)' },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
@@ -52,14 +52,10 @@ const ProfessionalChart = ({ data, height = 450 }) => {
         borderColor: '#2A2E39',
         timeVisible: false,
         borderVisible: true,
-        fixLeftEdge: true,
-        fixRightEdge: true,
       },
       handleScroll: {
         mouseWheel: true,
         pressedMouseMove: true,
-        horzTouchDrag: true,
-        vertTouchDrag: false,
       },
       handleScale: {
         axisPressedMouseMove: true,
@@ -70,7 +66,7 @@ const ProfessionalChart = ({ data, height = 450 }) => {
 
     chartRef.current = chart;
 
-    // Professional candlestick series
+    // Professional candlestick series - ThinkorSwim style colors
     const candleSeries = chart.addCandlestickSeries({
       upColor: '#26A69A',
       downColor: '#EF5350',
@@ -83,59 +79,64 @@ const ProfessionalChart = ({ data, height = 450 }) => {
     const fastEma = chart.addLineSeries({
       color: '#F7931A',
       lineWidth: 2,
-      lineStyle: 0, // Solid
-      priceLineVisible: false,
-      lastValueVisible: false,
+      lineStyle: 0,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: 4,
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
 
     // Mid EMA - dashed purple line
     const midEma = chart.addLineSeries({
       color: '#9B59B6',
       lineWidth: 2,
-      lineStyle: 2, // Dashed
-      priceLineVisible: false,
-      lastValueVisible: false,
+      lineStyle: 2,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: 4,
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
 
     // Slow EMA - dashed pink line  
     const slowEma = chart.addLineSeries({
       color: '#E91E8C',
       lineWidth: 2,
-      lineStyle: 2, // Dashed
-      priceLineVisible: false,
-      lastValueVisible: false,
+      lineStyle: 2,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: 4,
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
 
-    // Convert string dates to proper format for lightweight-charts
-    // The library accepts YYYY-MM-DD strings directly
-    const candleData = data.map(candle => ({
-      time: candle.time, // YYYY-MM-DD string format
+    // Convert string dates (YYYY-MM-DD) to unix timestamps
+    const parseDate = (dateStr) => {
+      const parts = dateStr.split('-');
+      const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      return Math.floor(date.getTime() / 1000);
+    };
+
+    // Sort data by date and convert to timestamp format
+    const sortedData = [...data].sort((a, b) => a.time.localeCompare(b.time));
+
+    const candleData = sortedData.map(candle => ({
+      time: parseDate(candle.time),
       open: candle.open,
       high: candle.high,
       low: candle.low,
       close: candle.close,
-    })).sort((a, b) => a.time.localeCompare(b.time));
+    }));
 
-    const fastEmaData = data
+    const fastEmaData = sortedData
       .filter(c => c.fast_ema != null)
-      .map(c => ({ time: c.time, value: c.fast_ema }))
-      .sort((a, b) => a.time.localeCompare(b.time));
+      .map(c => ({ time: parseDate(c.time), value: c.fast_ema }));
 
-    const midEmaData = data
+    const midEmaData = sortedData
       .filter(c => c.mid_ema != null)
-      .map(c => ({ time: c.time, value: c.mid_ema }))
-      .sort((a, b) => a.time.localeCompare(b.time));
+      .map(c => ({ time: parseDate(c.time), value: c.mid_ema }));
 
-    const slowEmaData = data
+    const slowEmaData = sortedData
       .filter(c => c.slow_ema != null)
-      .map(c => ({ time: c.time, value: c.slow_ema }))
-      .sort((a, b) => a.time.localeCompare(b.time));
+      .map(c => ({ time: parseDate(c.time), value: c.slow_ema }));
 
     // Set data
     candleSeries.setData(candleData);
@@ -156,7 +157,7 @@ const ProfessionalChart = ({ data, height = 450 }) => {
       });
     }
 
-    // Fit content and scroll to latest
+    // Fit content
     chart.timeScale().fitContent();
 
     // Handle resize
@@ -194,20 +195,25 @@ const ProfessionalChart = ({ data, height = 450 }) => {
     <div className="relative">
       <div ref={chartContainerRef} style={{ height }} />
       
-      {/* EMA Legend */}
-      <div className="absolute top-3 left-3 flex items-center gap-4 text-xs font-sans z-10 bg-[#131722]/90 px-3 py-2 rounded border border-[#2A2E39]">
+      {/* EMA Legend - Professional Style */}
+      <div className="absolute top-3 left-3 flex items-center gap-4 text-xs z-10 bg-[#131722]/95 px-4 py-2 rounded border border-[#2A2E39]">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-0.5 bg-[#F7931A]"></div>
-          <span className="text-[#F7931A]">Fast EMA</span>
+          <div className="w-6 h-0.5 bg-[#F7931A]"></div>
+          <span className="text-[#F7931A] font-medium">Fast EMA</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-5 h-0.5 bg-[#9B59B6]" style={{borderTop: '2px dashed #9B59B6', height: 0}}></div>
-          <span className="text-[#9B59B6]">Mid EMA</span>
+          <div className="w-6 border-t-2 border-dashed border-[#9B59B6]"></div>
+          <span className="text-[#9B59B6] font-medium">Mid EMA</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-5 h-0.5 bg-[#E91E8C]" style={{borderTop: '2px dashed #E91E8C', height: 0}}></div>
-          <span className="text-[#E91E8C]">Slow EMA</span>
+          <div className="w-6 border-t-2 border-dashed border-[#E91E8C]"></div>
+          <span className="text-[#E91E8C] font-medium">Slow EMA</span>
         </div>
+      </div>
+
+      {/* TradingView Watermark */}
+      <div className="absolute bottom-3 left-3 text-xs text-zinc-600 font-medium">
+        Powered by TradingView
       </div>
     </div>
   );
