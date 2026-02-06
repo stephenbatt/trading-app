@@ -349,20 +349,34 @@ const Dashboard = () => {
         <div className="grid grid-cols-12 gap-4">
           {/* Charts Column */}
           <div className="col-span-12 lg:col-span-9 space-y-4">
-            {/* Candlestick Chart */}
+            {/* Candlestick Chart - TradingView Style */}
             <Card className="bg-zinc-900 border-zinc-800">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  Price Chart with EMAs
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-zinc-400 flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    {symbol} - Price Chart
+                  </CardTitle>
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-mono text-2xl font-bold text-white" data-testid="current-price">
+                      {formatPrice(currentCandle?.close)}
+                    </span>
+                    <span className={`font-mono text-sm font-semibold ${getPriceChangeColor(priceChange)}`}>
+                      {formatPercent(priceChange)}
+                    </span>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="p-2">
+              <CardContent className="p-0">
                 {loading ? (
                   <Skeleton className="h-[400px] w-full" />
                 ) : (
-                  <div className="chart-container" data-testid="candlestick-chart">
-                    <CandlestickChart data={stockData?.candles || []} height={400} />
+                  <div data-testid="candlestick-chart">
+                    <TradingChart 
+                      data={stockData?.candles || []} 
+                      emaSettings={userSettings}
+                      height={400} 
+                    />
                   </div>
                 )}
               </CardContent>
