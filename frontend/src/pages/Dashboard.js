@@ -248,36 +248,42 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Top Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {/* Symbol Selector */}
-            <Select value={symbol} onValueChange={setSymbol}>
-              <SelectTrigger className="w-[180px] bg-zinc-800 border-zinc-700" data-testid="symbol-selector">
-                <SelectValue placeholder="Select symbol" />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700">
-                {symbols.map((s) => (
-                  <SelectItem key={s.symbol} value={s.symbol} className="text-white hover:bg-zinc-700">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold">{s.symbol}</span>
-                      <span className="text-zinc-400 text-xs">{s.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Top Controls - STOCK PICKER */}
+        <Card className="bg-zinc-900 border-zinc-800">
+          <CardContent className="p-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {/* Symbol Selector - Made Prominent */}
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm text-zinc-400 font-medium">Pick Stock:</Label>
+                  <Select value={symbol} onValueChange={setSymbol}>
+                    <SelectTrigger className="w-[220px] bg-zinc-800 border-zinc-600 text-white font-mono text-lg" data-testid="symbol-selector">
+                      <SelectValue placeholder="Select a stock" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700 max-h-[300px]">
+                      {symbols.map((s) => (
+                        <SelectItem key={s.symbol} value={s.symbol} className="text-white hover:bg-zinc-700 py-2">
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono font-bold text-green-400">{s.symbol}</span>
+                            <span className="text-zinc-400 text-sm">{s.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="border-zinc-700"
-              data-testid="refresh-button"
-            >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="border-zinc-600"
+                  data-testid="refresh-button"
+                >
+                  <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                </Button>
+              </div>
           </div>
 
           {/* Strategy Toggle */}
