@@ -106,15 +106,19 @@ const Dashboard = () => {
 
   // Fetch open trades
   useEffect(() => {
-    const fetchOpenTrades = async () => {
+    const fetchTrades = async () => {
       try {
-        const response = await paperTrades.getAll('open');
-        setOpenTrades(response.data.trades.filter(t => t.symbol === symbol));
+        const [openResponse, allResponse] = await Promise.all([
+          paperTrades.getAll('open'),
+          paperTrades.getAll()
+        ]);
+        setOpenTrades(openResponse.data.trades.filter(t => t.symbol === symbol));
+        setAllTrades(allResponse.data.trades);
       } catch (error) {
         console.error('Failed to fetch trades:', error);
       }
     };
-    fetchOpenTrades();
+    fetchTrades();
   }, [symbol]);
 
   const handleRefresh = () => {
@@ -128,8 +132,12 @@ const Dashboard = () => {
       await paperTrades.create(symbol, positionType, tradingQuantity);
       toast.success(`${positionType.toUpperCase()} position opened for ${symbol}`);
       // Refresh trades
-      const response = await paperTrades.getAll('open');
-      setOpenTrades(response.data.trades.filter(t => t.symbol === symbol));
+      const [openResponse, allResponse] = await Promise.all([
+        paperTrades.getAll('open'),
+        paperTrades.getAll()
+      ]);
+      setOpenTrades(openResponse.data.trades.filter(t => t.symbol === symbol));
+      setAllTrades(allResponse.data.trades);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to place trade');
     } finally {
