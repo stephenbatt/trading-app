@@ -1,34 +1,180 @@
-.App-logo {
-    height: 40vmin;
+/* Main App Styles */
+
+/* Login/Auth background */
+.auth-bg {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.9)),
+        url('https://images.unsplash.com/photo-1647067517631-aa36cda58a17?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMHN0b2NrJTIwbWFya2V0JTIwZGF0YSUyMHZpc3VhbGl6YXRpb24lMjBkYXJrJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzAzMzYyMjF8MA&ixlib=rb-4.1.0&q=85');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Dashboard layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Chart panels */
+.chart-panel {
+    background: #18181B;
+    border: 1px solid #27272A;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.chart-panel:hover {
+    border-color: #3F3F46;
+}
+
+/* Price display */
+.price-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.price-change-positive {
+    color: #22C55E;
+}
+
+.price-change-negative {
+    color: #EF4444;
+}
+
+/* Indicator panels */
+.indicator-panel {
+    position: relative;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.indicator-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
     pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
+/* CCI specific */
+.cci-panel {
+    border-left: 2px solid rgba(6, 182, 212, 0.3);
+}
+
+/* MACD specific */
+.macd-panel {
+    border-left: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+/* Slider customization */
+.ema-slider {
+    background: #27272A;
+}
+
+/* Table styling */
+.results-table {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.results-table th {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: #A1A1AA;
+}
+
+.results-table td {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Navigation */
+.nav-item {
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-item.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 2px solid #3B82F6;
+}
+
+/* Status badges */
+.status-open {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22C55E;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-closed {
+    background: rgba(161, 161, 170, 0.15);
+    color: #A1A1AA;
+    border: 1px solid rgba(161, 161, 170, 0.3);
+}
+
+/* Loading states */
+.skeleton-pulse {
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0.3;
     }
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Toast notifications */
+.toast-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-.App-link {
-    color: #61dafb;
+.toast-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+/* Form inputs */
+.input-dark {
+    background: #18181B;
+    border: 1px solid #27272A;
+    color: #FAFAFA;
+}
+
+.input-dark:focus {
+    border-color: #3B82F6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .price-display {
+        font-size: 1.5rem;
     }
-    to {
-        transform: rotate(360deg);
+    
+    .dashboard-grid {
+        gap: 0.5rem;
+        padding: 0.5rem;
     }
 }
