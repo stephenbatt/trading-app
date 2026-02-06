@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { stocks, paperTrades, settings as settingsApi } from '../lib/api';
 import Layout from '../components/Layout';
-import CandlestickChart from '../components/CandlestickChart';
+import TradingChart from '../components/TradingChart';
 import CCIChart from '../components/CCIChart';
 import MACDChart from '../components/MACDChart';
 import { Button } from '../components/ui/button';
@@ -20,7 +20,10 @@ import {
   DollarSign,
   BarChart3,
   Loader2,
-  Power
+  Power,
+  Wallet,
+  Trophy,
+  Target
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatPrice, formatPercent, getPriceChangeColor } from '../lib/utils';
@@ -38,8 +41,18 @@ const Dashboard = () => {
     strategy_enabled: false,
   });
   const [openTrades, setOpenTrades] = useState([]);
+  const [allTrades, setAllTrades] = useState([]);
   const [tradingQuantity, setTradingQuantity] = useState(10);
   const [placingTrade, setPlacingTrade] = useState(false);
+  const [bankroll, setBankroll] = useState(10000); // Starting bankroll
+
+  // Calculate P&L stats
+  const closedTrades = allTrades.filter(t => t.status === 'closed');
+  const totalPnL = closedTrades.reduce((sum, t) => sum + (t.profit_loss || 0), 0);
+  const winningTrades = closedTrades.filter(t => t.profit_loss > 0);
+  const losingTrades = closedTrades.filter(t => t.profit_loss <= 0);
+  const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
+  const currentBalance = bankroll + totalPnL;
 
   // Fetch available symbols
   useEffect(() => {
