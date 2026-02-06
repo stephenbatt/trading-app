@@ -284,9 +284,7 @@ const Dashboard = () => {
                   <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
                 </Button>
               </div>
-          </div>
 
-          {/* Strategy Toggle */}
               {/* Strategy Toggle */}
               <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700">
                 <Power className={`h-4 w-4 ${userSettings.strategy_enabled ? 'text-green-500' : 'text-zinc-500'}`} />
