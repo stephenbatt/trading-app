@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -15,6 +15,39 @@ import bcrypt
 import httpx
 import numpy as np
 from collections import defaultdict
+
+# Load environment variables
+load_dotenv()
+
+# Logging setup
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# FastAPI app
+app = FastAPI()
+
+# CORS configuration for Render frontend + local dev
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://trading-app-1-1fv3.onrender.com",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# MongoDB client (adjust URI/DB name if needed)
+MONGODB_URI = os.getenv("MONGODB_URI")
+client = AsyncIOMotorClient(MONGODB_URI) if MONGODB_URI else None
+db = client["trading_app"] if client else None
+
+# Security
+security = HTTPBearer()
+JWT_SECRET = os.getenv("JWT_SECRET", "change_me")
+JWT_ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
