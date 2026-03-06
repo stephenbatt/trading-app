@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_BACKEND_URL + '/api';
+// Use the correct environment variable
+const API_BASE = process.env.REACT_APP_API_URL + '/api';
 
 // Create axios instance
 const api = axios.create({
@@ -41,9 +42,9 @@ export const auth = {
 
 // Stock data endpoints
 export const stocks = {
-  getData: (symbol, interval = 'daily') => 
+  getData: (symbol, interval = 'daily') =>
     api.get(`/stocks/${symbol}?interval=${interval}`),
-  getIndicators: (symbol, params) => 
+  getIndicators: (symbol, params) =>
     api.get(`/stocks/${symbol}/indicators`, { params }),
   getSymbols: () => api.get('/symbols'),
 };
@@ -56,10 +57,12 @@ export const backtest = {
 
 // Paper trading endpoints
 export const paperTrades = {
-  create: (symbol, positionType, quantity) => 
-    api.post(`/paper-trades?symbol=${symbol}&position_type=${positionType}&quantity=${quantity}`),
+  create: (symbol, positionType, quantity) =>
+    api.post(
+      `/paper-trades?symbol=${symbol}&position_type=${positionType}&quantity=${quantity}`
+    ),
   getAll: (status) => api.get('/paper-trades', { params: { status } }),
-  close: (tradeId, exitReason = 'manual') => 
+  close: (tradeId, exitReason = 'manual') =>
     api.put(`/paper-trades/${tradeId}/close?exit_reason=${exitReason}`),
   updateStop: (tradeId) => api.put(`/paper-trades/${tradeId}/update-stop`),
 };
