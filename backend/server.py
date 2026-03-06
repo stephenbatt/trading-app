@@ -873,28 +873,24 @@ async def get_available_symbols():
         {"symbol": "DIA", "name": "SPDR Dow Jones Industrial"},
         {"symbol": "BA", "name": "Boeing Company"},
         {"symbol": "DIS", "name": "Walt Disney Company"},
-        {"symbol": "NFLX", "name": "Netflix Inc."}
+        {"symbol": "NFLX", "name": "Netflix Inc."},
     ]
     return {"symbols": symbols}
+
 
 # Include router
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if client:
+        client.close()
 
-import uvicorn
-import os
 
 if __name__ == "__main__":
+    import uvicorn
+    import os
+
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)t=port)
