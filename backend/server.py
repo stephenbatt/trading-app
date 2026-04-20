@@ -29,7 +29,9 @@ app = FastAPI()
 # CORS configuration for Render frontend + local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://trading-app-am8h.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
