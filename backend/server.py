@@ -30,7 +30,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://trading-app-am8h.vercel.app"
+        "https://trading-app-am8h.vercel.app",
+        "https://trading-app-am8h-4nrujik6k-joannbatt2016-9014s-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -64,7 +65,6 @@ JWT_EXPIRATION_HOURS = 24
 # Alpha Vantage
 ALPHA_VANTAGE_KEY = os.environ.get('ALPHA_VANTAGE_KEY', 'demo')
 
-app = FastAPI()
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
