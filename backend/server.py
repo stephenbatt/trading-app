@@ -854,32 +854,73 @@ async def update_settings(settings: UserSettings, user: dict = Depends(get_curre
     )
     return {"message": "Settings updated", "settings": settings.model_dump()}
 
-# ==================== AVAILABLE SYMBOLS ====================
+# =========================
+# AUTO SETTLE SYSTEM
+# =========================
 
-@api_router.get("/symbols")
-async def get_available_symbols():
-    """Get list of popular stock symbols"""
-    symbols = [
-        {"symbol": "AAPL", "name": "Apple Inc."},
-        {"symbol": "MSFT", "name": "Microsoft Corporation"},
-        {"symbol": "GOOGL", "name": "Alphabet Inc."},
-        {"symbol": "AMZN", "name": "Amazon.com Inc."},
-        {"symbol": "TSLA", "name": "Tesla Inc."},
-        {"symbol": "META", "name": "Meta Platforms Inc."},
-        {"symbol": "NVDA", "name": "NVIDIA Corporation"},
-        {"symbol": "JPM", "name": "JPMorgan Chase & Co."},
-        {"symbol": "V", "name": "Visa Inc."},
-        {"symbol": "SPY", "name": "SPDR S&P 500 ETF"},
-        {"symbol": "QQQ", "name": "Invesco QQQ Trust"},
-        {"symbol": "DIA", "name": "SPDR Dow Jones Industrial"},
-        {"symbol": "BA", "name": "Boeing Company"},
-        {"symbol": "DIS", "name": "Walt Disney Company"},
-        {"symbol": "NFLX", "name": "Netflix Inc."},
-    ]
-    return {"symbols": symbols}
+import threading
+import time
+from datetime import datetime
+
+def auto_settle_trades():
+    print("🔔 Running auto-settle...")
+
+    async def close_all():
+        async for trade in db.paper_trades.find({"status": "open"}):
+            data = await fetch_stock_data(trade["symbol"], "daily")
+            exit_price = data["candles"][-1]["close"]
+
+            if trade["position_type"] == "long":
+                pnl = (exit_price - trade["entry_price"]) * trade["quantity"]
+            else:
+                pnl = (trade["entry_price"] - exit_price) * trade["quantity"]
+
+            await db.paper_trades.update_one(
+                {"id": trade["id"]},
+                {
+                    "$set": {
+                        "exit_price": exit_price,
+                        "exit_time": datetime.utcnow().isoformat(),
+                        "status": "closed",
+                        "profit_loss": round(pnl, 2),
+                        "exit_reason": "auto_close_eod"
+                    }
+                }
+            )
+
+    import asyncio
+    asyncio.run(close_all())
 
 
-# Include router
+def background_worker():
+    already_settled_today = False
+
+    while True:
+        try:
+            now = datetime.utcnow()
+            hour = now.hour - 4  # EST adjust
+
+            if hour >= 16 and not already_settled_today:
+                auto_settle_trades()
+                already_settled_today = True
+
+            if hour < 9:
+                already_settled_today = False
+
+        except Exception as e:
+            print("Worker error:", e)
+
+        time.sleep(60)
+
+
+@app.on_event("startup")
+async def start_worker():
+    threading.Thread(target=background_worker, daemon=True).start()
+
+# =========================
+# EXISTING APP STRUCTURE
+# =========================
+
 app.include_router(api_router)
 
 
