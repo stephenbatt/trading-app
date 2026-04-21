@@ -87,7 +87,7 @@ const Dashboard = () => {
         fast_ema: userSettings.fast_ema,
         mid_ema: userSettings.mid_ema,
         slow_ema: userSettings.slow_ema,
-        interval: 'daily',
+        interval: '1min',
       });
       setStockData(response.data);
     } catch (error) {
@@ -100,9 +100,20 @@ const Dashboard = () => {
   }, [symbol, userSettings.fast_ema, userSettings.mid_ema, userSettings.slow_ema]);
 
   useEffect(() => {
-    setLoading(true);
+  setLoading(true);
+
+  const loadData = () => {
     fetchStockData();
-  }, [fetchStockData]);
+  };
+
+  loadData(); // first load
+
+  const interval = setInterval(() => {
+    loadData();
+  }, 5000); // every 5 seconds
+
+  return () => clearInterval(interval);
+}, [fetchStockData]);
 
   // Fetch open trades
   useEffect(() => {
