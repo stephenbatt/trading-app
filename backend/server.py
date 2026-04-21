@@ -26,13 +26,9 @@ logger = logging.getLogger(__name__)
 # FastAPI app
 app = FastAPI()
 
-# CORS configuration for Render frontend + local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://trading-app-am8h.vercel.app",
-        "https://trading-app-am8h-4nrujik6k-joannbatt2016-9014s-projects.vercel.app"
-    ],
+    allow_origins=["*"],  # allow everything (fixes your issue immediately)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
