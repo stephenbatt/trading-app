@@ -331,7 +331,7 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
                 time_series = data[time_series_key]
                 candles = []
                 
-                for date_str, values in sorted(time_series.items()):
+                               for date_str, values in sorted(time_series.items()):
                     candles.append({
                         "time": date_str,
                         "open": float(values["1. open"]),
@@ -341,16 +341,28 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
                         "volume": int(values["5. volume"])
                     })
                 
-                result = {"symbol": symbol, "interval": interval, "candles": candles, "data_source": "alpha_vantage"}
+                result = {
+                    "symbol": symbol,
+                    "interval": interval,
+                    "candles": candles,
+                    "data_source": "alpha_vantage"
+                }
                 
                 # Cache the result
                 await db.stock_cache.update_one(
                     {"cache_key": cache_key},
-                    {"$set": {"cache_key": cache_key, "data": result, "cached_at": datetime.now(timezone.utc).isoformat()}},
+                    {
+                        "$set": {
+                            "cache_key": cache_key,
+                            "data": result,
+                            "cached_at": datetime.now(timezone.utc).isoformat()
+                        }
+                    },
                     upsert=True
                 )
                 
                 return result
+
     except Exception as e:
         logger.warning(f"Alpha Vantage API error: {e}")
     
@@ -358,7 +370,10 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
     if cached:
         return cached["data"]
     
-   raise HTTPException(status_code=500, detail="Stock API failed - no valid data source")
+    raise HTTPException(
+        status_code=500,
+        detail="Stock API failed - no valid data source"
+    )
 
 # ==================== BACKTESTING ENGINE ====================
 
