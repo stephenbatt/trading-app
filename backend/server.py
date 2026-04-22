@@ -358,7 +358,20 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
                     upsert=True
                 )
                 
-                return result
+                return {
+    "symbol": symbol,
+    "interval": interval,
+    "candles": [
+        {
+            "time": "TEST",
+            "open": 999,
+            "high": 999,
+            "low": 999,
+            "close": 999,
+            "volume": 999
+        }
+    ]
+}
 
     except Exception as e:
         logger.warning(f"Alpha Vantage API error: {e}")
