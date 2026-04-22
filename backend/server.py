@@ -146,23 +146,6 @@ def create_token(user_id: str, email: str) -> str:
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
-async def get_current_user(*args, **kwargs):
-    return {"id": "dev-user"}
-
-    try:
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get("sub")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        return user
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
 # ==================== INDICATOR CALCULATIONS ====================
 
 def calculate_ema(prices: List[float], period: int) -> List[Optional[float]]:
