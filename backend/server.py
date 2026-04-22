@@ -892,7 +892,54 @@ async def get_available_symbols():
     ]
     return {"symbols": symbols}
 
+# ==================== PRICEBAND SETTLEMENT ====================
 
+async def settle_all_bets():
+    bets = await db.trades.find({"status": "open"}).to_list(1000)
+
+    for bet in bets:
+        symbol = bet.get("symbol")
+
+        data = await fetch_stock_data(symbol)
+        if not data or not data.get("candles"):
+            continue
+
+        current_price = data["candles"][-1]["close"]
+
+        low = float(bet.get("low", 0))
+        high = float(bet.get("high", 0))
+        amount = float(bet.get("amount", 0))
+        bet_type = bet.get("type")
+
+        if bet_type == "inside":
+            win = low <= current_price <= high
+        else:
+            win = current_price < low or current_price > high
+
+        payout = amount if win else -amount
+
+        await db.paper_account.update_one(
+            {},
+            {"$inc": {"balance": payout}}
+        )
+
+        await db.trades.update_one(
+            {"_id": bet["_id"]},
+            {
+                "$set": {
+                    "status": "closed",
+                    "result": "win" if win else "loss",
+                    "final_price": current_price
+                }
+            }
+        )
+
+
+@api_router.post("/settle-now")
+async def settle_now():
+    await settle_all_bets()
+    return {"status": "settled"}
+    
 # Include router
 app.include_router(api_router)
 
