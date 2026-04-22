@@ -647,20 +647,27 @@ async def get_indicators(
     interval: str = "daily",
     user: dict = Depends(get_current_user)
 ):
-    """Get stock data with custom indicator settings"""
+    """Get stock data with indicators (FIXED TO USE REAL DATA)"""
+
+    # ✅ USE THE SAME DATA SOURCE AS WORKING ENDPOINT
     data = await fetch_stock_data(symbol.upper(), interval)
     candles = data["candles"]
+    
+    if not candles:
+        raise HTTPException(status_code=404, detail="No data found")
     
     closes = [c["close"] for c in candles]
     highs = [c["high"] for c in candles]
     lows = [c["low"] for c in candles]
     
+    # Calculate indicators
     fast_ema_vals = calculate_ema(closes, fast_ema)
     mid_ema_vals = calculate_ema(closes, mid_ema)
     slow_ema_vals = calculate_ema(closes, slow_ema)
     cci = calculate_cci(highs, lows, closes, 20)
     macd = calculate_macd(closes)
     
+    # Combine data
     for i, candle in enumerate(candles):
         candle["fast_ema"] = round(fast_ema_vals[i], 4) if fast_ema_vals[i] else None
         candle["mid_ema"] = round(mid_ema_vals[i], 4) if mid_ema_vals[i] else None
@@ -672,7 +679,11 @@ async def get_indicators(
         "symbol": symbol.upper(),
         "interval": interval,
         "candles": candles,
-        "ema_settings": {"fast_ema": fast_ema, "mid_ema": mid_ema, "slow_ema": slow_ema}
+        "ema_settings": {
+            "fast_ema": fast_ema,
+            "mid_ema": mid_ema,
+            "slow_ema": slow_ema
+        }
     }
 
 # ==================== BACKTESTING ROUTES ====================
