@@ -358,19 +358,7 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
     if cached:
         return cached["data"]
     
-    # Generate sample data as fallback
-    logger.info(f"Using sample data for {symbol}")
-    candles = generate_sample_stock_data(symbol)
-    result = {"symbol": symbol, "interval": interval, "candles": candles, "data_source": "sample"}
-    
-    # Cache sample data (shorter duration)
-    await db.stock_cache.update_one(
-        {"cache_key": cache_key},
-        {"$set": {"cache_key": cache_key, "data": result, "cached_at": datetime.now(timezone.utc).isoformat()}},
-        upsert=True
-    )
-    
-    return result
+   raise HTTPException(status_code=500, detail="Stock API failed - no valid data source")
 
 # ==================== BACKTESTING ENGINE ====================
 
