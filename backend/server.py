@@ -283,44 +283,7 @@ def generate_sample_stock_data(symbol: str, days: int = 300) -> List[Dict]:
         current_price = close_price
     
     return candles
-
-# ==================== ALPHA VANTAGE ====================
-
-async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
-    """Fetch stock data from Alpha Vantage with caching"""
-    cache_key = f"{symbol}_{interval}"
-    
-    # Check cache first
-    cached = await db.stock_cache.find_one({"cache_key": cache_key}, {"_id": 0})
-    if cached:
-        cache_time = datetime.fromisoformat(cached["cached_at"])
-        cache_duration = timedelta(hours=1) if interval != "daily" else timedelta(hours=24)
-        if datetime.now(timezone.utc) - cache_time < cache_duration:
-            return cached["data"]
-    
-    # Try to fetch from Alpha Vantage
-    try:
-        if ALPHA_VANTAGE_KEY and ALPHA_VANTAGE_KEY != "demo":
-            base_url = "https://www.alphavantage.co/query"
-            
-            if interval == "daily":
-                params = {
-                    "function": "TIME_SERIES_DAILY",
-                    "symbol": symbol,
-                    "outputsize": "compact",
-                    "apikey": ALPHA_VANTAGE_KEY
-                }
-                time_series_key = "Time Series (Daily)"
-            else:
-                params = {
-                    "function": "TIME_SERIES_INTRADAY",
-                    "symbol": symbol,
-                    "interval": interval,
-                    "outputsize": "compact",
-                    "apikey": ALPHA_VANTAGE_KEY
-                }
-                time_series_key = f"Time Series ({interval})"
-            
+ 
            # ==================== ALPHA VANTAGE ====================
 
 async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
