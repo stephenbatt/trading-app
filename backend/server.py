@@ -513,6 +513,29 @@ def run_backtest(candles: List[Dict], fast_period: int, mid_period: int, slow_pe
         "trades": trades
     }
 
+# ==================== AUTH HELPER (FIX LOGIN LOOP) ====================
+
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import jwt
+
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+
+        return {
+            "id": payload.get("id"),
+            "email": payload.get("sub"),
+            "name": payload.get("name", "User"),
+            "created_at": payload.get("created_at", "2024-01-01T00:00:00Z")
+        }
+
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+        
 # ==================== AUTH ROUTES ====================
 
 @api_router.post("/auth/register", response_model=TokenResponse)
@@ -574,28 +597,6 @@ async def get_me(user: dict = Depends(get_current_user)):
         name=user["name"],
         created_at=user["created_at"]
     )
-# ==================== AUTH HELPER (FIX LOGIN LOOP) ====================
-
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-import jwt
-
-security = HTTPBearer()
-
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        token = credentials.credentials
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-
-        return {
-            "id": payload.get("id"),
-            "email": payload.get("sub"),
-            "name": payload.get("name", "User"),
-            "created_at": payload.get("created_at", "2024-01-01T00:00:00Z")
-        }
-
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid token")
 
 # ==================== STOCK DATA ROUTES ====================
 
