@@ -287,14 +287,13 @@ def generate_sample_stock_data(symbol: str, days: int = 300) -> List[Dict]:
 # ==================== ALPHA VANTAGE ====================
 
 async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
-    """Fetch stock data from Alpha Vantage with caching and sample data fallback"""
+    """Fetch stock data from Alpha Vantage with caching"""
     cache_key = f"{symbol}_{interval}"
     
     # Check cache first
     cached = await db.stock_cache.find_one({"cache_key": cache_key}, {"_id": 0})
     if cached:
         cache_time = datetime.fromisoformat(cached["cached_at"])
-        # Cache valid for 1 hour for intraday, 24 hours for daily
         cache_duration = timedelta(hours=1) if interval != "daily" else timedelta(hours=24)
         if datetime.now(timezone.utc) - cache_time < cache_duration:
             return cached["data"]
@@ -331,7 +330,7 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
                 time_series = data[time_series_key]
                 candles = []
                 
-                               for date_str, values in sorted(time_series.items()):
+                for date_str, values in sorted(time_series.items()):
                     candles.append({
                         "time": date_str,
                         "open": float(values["1. open"]),
@@ -351,13 +350,11 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
                 # Cache the result
                 await db.stock_cache.update_one(
                     {"cache_key": cache_key},
-                    {
-                        "$set": {
-                            "cache_key": cache_key,
-                            "data": result,
-                            "cached_at": datetime.now(timezone.utc).isoformat()
-                        }
-                    },
+                    {"$set": {
+                        "cache_key": cache_key,
+                        "data": result,
+                        "cached_at": datetime.now(timezone.utc).isoformat()
+                    }},
                     upsert=True
                 )
                 
@@ -374,7 +371,6 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict:
         status_code=500,
         detail="Stock API failed - no valid data source"
     )
-
 # ==================== BACKTESTING ENGINE ====================
 
 def run_backtest(candles: List[Dict], fast_period: int, mid_period: int, slow_period: int, initial_capital: float = 10000.0) -> Dict:
