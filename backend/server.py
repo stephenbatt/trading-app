@@ -30,6 +30,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://trading-app-am8h-7ztcb9mae-joannbatt2016-9014s-projects.vercel.app",
+        "https://trading-app-3r3o.onrender.com",
         "http://localhost:3000"
     ],
     allow_credentials=True,
