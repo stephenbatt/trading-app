@@ -82,39 +82,39 @@ const Dashboard = () => {
 
   // Fetch stock data
   const fetchStockData = useCallback(async () => {
-    try {
-      const response = await stocks.getIndicators(symbol, {
-        fast_ema: userSettings.fast_ema,
-        mid_ema: userSettings.mid_ema,
-        slow_ema: userSettings.slow_ema,
-        interval: 'daily',
-      });
-      setStockData(response.data);
-    } catch (error) {
-      console.error('Failed to fetch stock data:', error);
-      toast.error('Failed to load stock data');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [symbol, userSettings.fast_ema, userSettings.mid_ema, userSettings.slow_ema]);
+  try {
+    const response = await stocks.getIndicators(symbol, {
+      fast_ema: userSettings.fast_ema,
+      mid_ema: userSettings.mid_ema,
+      slow_ema: userSettings.slow_ema,
+      interval: '5min'   // ✅ THIS is what we want
+    });
 
-  useEffect(() => {
-  setLoading(true);
+    setStockData(response.data);
+  } catch (error) {
+    console.error('Failed to fetch stock data:', error);
+    toast.error('Failed to load stock data');
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+}, [
+  symbol,
+  userSettings.fast_ema,
+  userSettings.mid_ema,
+  userSettings.slow_ema
+]);
 
-  const loadData = () => {
+useEffect(() => {
+  fetchStockData();
+
+  const intervalId = setInterval(() => {
     fetchStockData();
-  };
+  }, 30000);
 
-  loadData(); // first load
-
-  const interval = setInterval(() => {
-    loadData();
-  }, 5000); // every 5 seconds
-
-  return () => clearInterval(interval);
+  return () => clearInterval(intervalId);
 }, [fetchStockData]);
-
+  
   // Fetch open trades
   useEffect(() => {
     const fetchTrades = async () => {
