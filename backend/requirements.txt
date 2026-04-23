@@ -33,3 +33,5 @@ charset-normalizer==3.3.2
 urllib3==2.2.1
 
 typing_extensions==4.14.1
+pandas==2.2.2
+yfinance==0.2.40
