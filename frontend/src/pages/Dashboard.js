@@ -83,7 +83,7 @@ const Dashboard = () => {
   // Fetch stock data
   const fetchStockData = useCallback(async () => {
   try {
-    const response = await stocks.getIndicators(symbol, {
+    const response = await stocks.getStock(symbol);
       fast_ema: userSettings.fast_ema,
       mid_ema: userSettings.mid_ema,
       slow_ema: userSettings.slow_ema,
