@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // Use the correct environment variable
 const API_BASE = process.env.REACT_APP_BACKEND_URL + '/api';
+
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE,
@@ -10,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// Add auth token to requests
+// ✅ Add auth token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
