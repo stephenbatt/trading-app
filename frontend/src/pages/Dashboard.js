@@ -87,7 +87,7 @@ const Dashboard = () => {
         fast_ema: userSettings.fast_ema,
         mid_ema: userSettings.mid_ema,
         slow_ema: userSettings.slow_ema,
-        interval: '1min',
+        interval: 'daily',
       });
       setStockData(response.data);
     } catch (error) {
