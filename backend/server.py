@@ -28,7 +28,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow everything (fixes your issue immediately)
+    allow_origins=[
+        "https://trading-app-am8h-7ztcb9mae-joannbatt2016-9014s-projects.vercel.app",
+        "http://localhost:3000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
