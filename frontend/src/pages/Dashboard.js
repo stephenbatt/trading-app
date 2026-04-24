@@ -83,13 +83,7 @@ const Dashboard = () => {
   // Fetch stock data
   const fetchStockData = useCallback(async () => {
   try {
-    const response = await stocks.getStock(symbol);
-      fast_ema: userSettings.fast_ema,
-      mid_ema: userSettings.mid_ema,
-      slow_ema: userSettings.slow_ema,
-      interval: '5min'   // ✅ THIS is what we want
-    });
-
+    const response = await stocks.getData(symbol);
     setStockData(response.data);
   } catch (error) {
     console.error('Failed to fetch stock data:', error);
@@ -98,13 +92,8 @@ const Dashboard = () => {
     setLoading(false);
     setRefreshing(false);
   }
-}, [
-  symbol,
-  userSettings.fast_ema,
-  userSettings.mid_ema,
-  userSettings.slow_ema
-]);
-
+}, [symbol]);
+  
 useEffect(() => {
   fetchStockData();
 
