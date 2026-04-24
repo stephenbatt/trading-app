@@ -853,5 +853,29 @@ async def update_trade_stop(trade_id: str, user: dict = Depends(get_current_user
     
     data = await fetch_stock_data(trade["symbol"], "daily")
     current_price = data["candles"][-1]["close"]
-    # (rest of your file continues if there is more)
+
+    # 🔥 FIXED PART — THIS WAS MISSING
+    closes = [c["close"] for c in data["candles"]]
+    slow_ema = calculate_ema(closes, trade["ema_settings"]["slow_ema"])
+
+    new_stop = slow_ema[-1] if slow_ema[-1] else trade["stop_price"]
+
+    if trade["position_type"] == "long":
+        if new_stop > trade["stop_price"]:
+            await db.paper_trades.update_one(
+                {"id": trade_id},
+                {"$set": {"stop_price": round(new_stop, 4)}}
+            )
+    else:
+        if new_stop < trade["stop_price"]:
+            await db.paper_trades.update_one(
+                {"id": trade_id},
+                {"$set": {"stop_price": round(new_stop, 4)}}
+            )
+
+    return {"message": "Stop updated"}
+
+
+# 🔥 THIS LINE WAS COMPLETELY MISSING (THIS BROKE YOUR LOGIN + ROUTES)
+app.include_router(api_router)
 
