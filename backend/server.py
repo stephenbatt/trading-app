@@ -31,7 +31,7 @@ app.add_middleware(
     allow_origin_regex=r"https://.*\.vercel\.app",
     allow_origins=[
         "http://localhost:3000",
-        "https://trading-app-3r3o.onrender.com"
+        "https://trading-app-am8h-fch3aaaou-joannbatt2016-9014s-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
