@@ -1,8 +1,9 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime, timezone
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from datetime import datetime, timedelta
 import uuid
-from jose import jwt
+from jose import jwt, JWTError
 import yfinance as yf
 import pandas as pd
 
@@ -16,11 +17,14 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 # =============================
-# CORS
+# CORS (FIXED FOR AUTH)
 # =============================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://*.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,11 +42,31 @@ db = {
 # AUTH HELPERS
 # =============================
 def create_token(user_id):
-    return jwt.encode({"sub": user_id}, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(
+        {
+            "sub": user_id,
+            "exp": datetime.utcnow() + timedelta(hours=24)
+        },
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
 
-def get_current_user():
-    # simple placeholder (skip auth validation for now)
-    return {"id": "test-user"}
+security = HTTPBearer()
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        token = credentials.credentials
+
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        return {"id": user_id}
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 # =============================
 # AUTH ROUTES
@@ -66,14 +90,19 @@ async def login(data: dict):
                 "access_token": token,
                 "user": {"id": user["id"], "email": user["email"]}
             }
+
     raise HTTPException(status_code=401, detail="Invalid login")
 
 @api_router.get("/auth/me")
-async def me():
-    return {"id": "test-user", "email": "test@example.com"}
+async def me(user=Depends(get_current_user)):
+    for u in db["users"]:
+        if u["id"] == user["id"]:
+            return {"id": u["id"], "email": u["email"]}
+
+    raise HTTPException(status_code=404, detail="User not found")
 
 # =============================
-# STOCK DATA (WORKING)
+# STOCK DATA
 # =============================
 def get_stock_data(symbol):
     df = yf.download(symbol, period="3mo")
@@ -107,13 +136,13 @@ async def stocks(symbol: str):
     return {"candles": candles}
 
 # =============================
-# PAPER TRADES (BASIC)
+# PAPER TRADES
 # =============================
 @api_router.get("/paper-trades")
 async def get_trades():
     return {"trades": db["paper_trades"]}
 
 # =============================
-# FINAL LINE (CRITICAL)
+# FINAL
 # =============================
 app.include_router(api_router)
