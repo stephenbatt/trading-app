@@ -922,6 +922,46 @@ async def update_trade_stop(
     return {"message": "Stop updated", "stop_price": trade["stop_price"]}
 
 # ==================== FINAL HOOK ====================
+# ==================== SYMBOLS ====================
 
+@api_router.get("/symbols")
+async def get_symbols():
+    return {
+        "symbols": [
+            {"symbol": "AAPL", "name": "Apple Inc."},
+            {"symbol": "MSFT", "name": "Microsoft"},
+            {"symbol": "TSLA", "name": "Tesla"},
+            {"symbol": "AMZN", "name": "Amazon"},
+            {"symbol": "GOOGL", "name": "Google"},
+            {"symbol": "NVDA", "name": "NVIDIA"},
+        ]
+    }
+
+
+# ==================== SETTINGS ====================
+
+@api_router.get("/settings")
+async def get_settings(user: dict = Depends(get_current_user)):
+    user_full = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+
+    return user_full.get(
+        "settings",
+        {
+            "fast_ema": 20,
+            "mid_ema": 50,
+            "slow_ema": 200,
+            "strategy_enabled": False,
+        },
+    )
+
+
+@api_router.put("/settings")
+async def update_settings(data: dict, user: dict = Depends(get_current_user)):
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"settings": data}},
+    )
+    return {"message": "Settings updated"}
+    
 app.include_router(api_router)
 
