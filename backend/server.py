@@ -338,6 +338,7 @@ ALPHA_VANTAGE_KEY = os.environ.get("ALPHA_VANTAGE_KEY", "demo")
 POLYGON_API_KEY = os.environ.get("POLYGON_API_KEY")
 
 async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any]:
+    # ---------- POLYGON (INTRADAY) ----------
     try:
         url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/2026-04-01/2026-04-24"
 
@@ -352,50 +353,69 @@ async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any
             response = await client_http.get(url, params=params)
             data = response.json()
 
-        # ✅ SAFE CHECK + FALLBACK
-        if "results" not in data or not data["results"]:
-            logger.warning("Polygon returned no data — using fallback")
-
-            candles = generate_sample_stock_data(symbol.upper(), days=100)
+        if "results" in data and data["results"]:
+            candles = []
+            for item in data["results"]:
+                candles.append({
+                    "time": int(item["t"] / 1000),
+                    "open": float(item["o"]),
+                    "high": float(item["h"]),
+                    "low": float(item["l"]),
+                    "close": float(item["c"]),
+                    "volume": float(item["v"]),
+                })
 
             return {
                 "symbol": symbol.upper(),
-                "interval": interval,
+                "interval": "5min",
                 "candles": candles,
-                "data_source": "fallback",
+                "data_source": "polygon",
             }
 
-        candles = []
+    except Exception as e:
+        logger.warning(f"Polygon failed: {e}")
 
-        for item in data["results"]:
+    # ---------- YAHOO (FALLBACK) ----------
+    try:
+        yahoo_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}?interval=1d&range=1mo"
+
+        async with httpx.AsyncClient(timeout=10.0) as client_http:
+            response = await client_http.get(yahoo_url)
+            data = response.json()
+
+        result = data["chart"]["result"][0]
+        timestamps = result["timestamp"]
+        quotes = result["indicators"]["quote"][0]
+
+        candles = []
+        for i in range(len(timestamps)):
             candles.append({
-                "time": int(item["t"] / 1000),
-                "open": float(item["o"]),
-                "high": float(item["h"]),
-                "low": float(item["l"]),
-                "close": float(item["c"]),
-                "volume": float(item["v"]),
+                "time": timestamps[i],
+                "open": quotes["open"][i],
+                "high": quotes["high"][i],
+                "low": quotes["low"][i],
+                "close": quotes["close"][i],
+                "volume": quotes["volume"][i],
             })
 
         return {
             "symbol": symbol.upper(),
-            "interval": interval,
+            "interval": "daily",
             "candles": candles,
-            "data_source": "polygon",
+            "data_source": "yahoo",
         }
 
     except Exception as e:
-        logger.warning(f"Polygon API error: {e}")
+        logger.warning(f"Yahoo failed: {e}")
 
-        candles = generate_sample_stock_data(symbol.upper(), days=100)
-
-        return {
-            "symbol": symbol.upper(),
-            "interval": interval,
-            "candles": candles,
-            "data_source": "fallback",
-        }
-
+    # ---------- FINAL ----------
+    return {
+        "symbol": symbol.upper(),
+        "interval": interval,
+        "candles": [],
+        "data_source": "none",
+    }
+    
 # ==================== BACKTEST ENGINE ====================
 
 def run_backtest(
