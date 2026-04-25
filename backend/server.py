@@ -335,87 +335,52 @@ def generate_sample_stock_data(symbol: str, days: int = 300) -> List[Dict[str, A
 ALPHA_VANTAGE_KEY = os.environ.get("ALPHA_VANTAGE_KEY", "demo")
 
 
-async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict[str, Any]:
-    cache_key = f"{symbol.upper()}_{interval}"
-    cached = await db.stock_cache.find_one({"cache_key": cache_key}, {"_id": 0})
-    if cached:
-        cache_time = datetime.fromisoformat(cached["cached_at"])
-        cache_duration = (
-            timedelta(hours=1) if interval != "daily" else timedelta(hours=24)
-        )
-        if datetime.now(timezone.utc) - cache_time < cache_duration:
-            return cached["data"]
+POLYGON_API_KEY = os.environ.get("POLYGON_API_KEY")
 
+async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any]:
     try:
-        if ALPHA_VANTAGE_KEY and ALPHA_VANTAGE_KEY != "demo":
-            base_url = "https://www.alphavantage.co/query"
+        # 5-minute candles
+        multiplier = 5
+        timespan = "minute"
 
-            if interval == "daily":
-                params = {
-                    "function": "TIME_SERIES_DAILY",
-                    "symbol": symbol.upper(),
-                    "outputsize": "compact",
-                    "apikey": ALPHA_VANTAGE_KEY,
-                }
-                time_series_key = "Time Series (Daily)"
-            else:
-                params = {
-                    "function": "TIME_SERIES_INTRADAY",
-                    "symbol": symbol.upper(),
-                    "interval": interval,
-                    "outputsize": "compact",
-                    "apikey": ALPHA_VANTAGE_KEY,
-                }
-                time_series_key = f"Time Series ({interval})"
+        url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/{multiplier}/{timespan}/2024-01-01/2026-12-31"
 
-            async with httpx.AsyncClient(timeout=10.0) as client_http:
-                response = await client_http.get(base_url, params=params)
-                data = response.json()
+        params = {
+            "adjusted": "true",
+            "sort": "asc",
+            "limit": 5000,
+            "apiKey": POLYGON_API_KEY
+        }
 
-            if time_series_key in data:
-                time_series = data[time_series_key]
-                candles: List[Dict[str, Any]] = []
+        async with httpx.AsyncClient(timeout=10.0) as client_http:
+            response = await client_http.get(url, params=params)
+            data = response.json()
 
-                for date_str, values in sorted(time_series.items()):
-                    candles.append(
-                        {
-                            "time": date_str,
-                            "open": float(values["1. open"]),
-                            "high": float(values["2. high"]),
-                            "low": float(values["3. low"]),
-                            "close": float(values["4. close"]),
-                            "volume": int(values["5. volume"]),
-                        }
-                    )
+        if "results" not in data:
+            raise Exception("Polygon returned no data")
 
-                result = {
-                    "symbol": symbol.upper(),
-                    "interval": interval,
-                    "candles": candles,
-                    "data_source": "alpha_vantage",
-                }
+        candles = []
 
-                await db.stock_cache.update_one(
-                    {"cache_key": cache_key},
-                    {
-                        "$set": {
-                            "cache_key": cache_key,
-                            "data": result,
-                            "cached_at": datetime.now(timezone.utc).isoformat(),
-                        }
-                    },
-                    upsert=True,
-                )
+        for item in data["results"]:
+            candles.append({
+                "time": item["t"],
+                "open": float(item["o"]),
+                "high": float(item["h"]),
+                "low": float(item["l"]),
+                "close": float(item["c"]),
+                "volume": float(item["v"]),
+            })
 
-                return result
+        return {
+            "symbol": symbol.upper(),
+            "interval": interval,
+            "candles": candles,
+            "data_source": "polygon",
+        }
 
     except Exception as e:
-        logger.warning(f"Alpha Vantage API error: {e}")
-
-    if cached:
-        return cached["data"]
-
-    raise HTTPException(status_code=500, detail="Stock data unavailable")
+        logger.warning(f"Polygon API error: {e}")
+        raise HTTPException(status_code=500, detail="Stock data unavailable")
 
 # ==================== BACKTEST ENGINE ====================
 
