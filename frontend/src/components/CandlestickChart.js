@@ -202,9 +202,10 @@ const CandlestickChart = ({ data, height = 450 }) => {
             tick={{ fill: '#787B86', fontSize: 10, fontFamily: 'Inter, sans-serif' }}
             interval="preserveStartEnd"
             tickFormatter={(value) => {
-              const parts = value?.split('-');
-              return parts ? `${parts[1]}/${parts[2]}` : '';
-            }}
+  if (!value) return '';
+  const date = new Date(value * 1000);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}}
           />
           <YAxis
             domain={domain}
