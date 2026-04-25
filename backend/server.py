@@ -339,10 +339,6 @@ POLYGON_API_KEY = os.environ.get("POLYGON_API_KEY")
 
 async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any]:
     try:
-        # 5-minute candles
-        multiplier = 5
-        timespan = "minute"
-
         url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/2026-04-01/2026-04-24"
 
         params = {
@@ -356,14 +352,24 @@ async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any
             response = await client_http.get(url, params=params)
             data = response.json()
 
-        if "results" not in data:
-            raise Exception("Polygon returned no data")
+        # ✅ SAFE CHECK + FALLBACK
+        if "results" not in data or not data["results"]:
+            logger.warning("Polygon returned no data — using fallback")
+
+            candles = generate_sample_stock_data(symbol.upper(), days=100)
+
+            return {
+                "symbol": symbol.upper(),
+                "interval": interval,
+                "candles": candles,
+                "data_source": "fallback",
+            }
 
         candles = []
 
         for item in data["results"]:
             candles.append({
-                "time": item["t"],
+                "time": int(item["t"] / 1000),
                 "open": float(item["o"]),
                 "high": float(item["h"]),
                 "low": float(item["l"]),
@@ -380,10 +386,17 @@ async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any
 
     except Exception as e:
         logger.warning(f"Polygon API error: {e}")
-        raise HTTPException(status_code=500, detail="Stock data unavailable")
+
+        candles = generate_sample_stock_data(symbol.upper(), days=100)
+
+        return {
+            "symbol": symbol.upper(),
+            "interval": interval,
+            "candles": candles,
+            "data_source": "fallback",
+        }
 
 # ==================== BACKTEST ENGINE ====================
-
 
 def run_backtest(
     candles: List[Dict[str, Any]],
