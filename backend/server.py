@@ -964,4 +964,3 @@ async def update_settings(data: dict, user: dict = Depends(get_current_user)):
     return {"message": "Settings updated"}
     
 app.include_router(api_router)
-
