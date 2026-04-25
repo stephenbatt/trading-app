@@ -415,14 +415,7 @@ async def fetch_stock_data(symbol: str, interval: str = "daily") -> Dict[str, An
     if cached:
         return cached["data"]
 
-    # final fallback: sample data so frontend doesn't die
-    candles = generate_sample_stock_data(symbol.upper(), days=200)
-    return {
-        "symbol": symbol.upper(),
-        "interval": interval,
-        "candles": candles,
-        "data_source": "sample",
-    }
+    raise HTTPException(status_code=500, detail="Stock data unavailable")
 
 # ==================== BACKTEST ENGINE ====================
 
