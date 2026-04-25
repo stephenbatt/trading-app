@@ -343,7 +343,7 @@ async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any
         multiplier = 5
         timespan = "minute"
 
-        url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/{multiplier}/{timespan}/2024-01-01/2026-12-31"
+        url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/2026-04-01/2026-04-24"
 
         params = {
             "adjusted": "true",
