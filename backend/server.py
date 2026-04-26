@@ -375,54 +375,11 @@ async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any
     except Exception as e:
         logger.warning(f"Polygon failed: {e}")
 
-  # ---------- YAHOO (FALLBACK) ----------
-try:
-    yahoo_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}?interval=1d&range=1mo"
-
-    async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any]:
-    from datetime import datetime
-
-    # ---------- POLYGON (INTRADAY) ----------
-    try:
-        url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/2026-04-01/2026-04-24"
-
-        params = {
-            "adjusted": "true",
-            "sort": "asc",
-            "limit": 5000,
-            "apiKey": POLYGON_API_KEY
-        }
-
-        async with httpx.AsyncClient(timeout=10.0) as client_http:
-            response = await client_http.get(url, params=params)
-            data = response.json()
-
-        if "results" in data and data["results"]:
-            candles = []
-
-            for item in data["results"]:
-                candles.append({
-                    "time": int(item["t"] / 1000),
-                    "open": float(item["o"]),
-                    "high": float(item["h"]),
-                    "low": float(item["l"]),
-                    "close": float(item["c"]),
-                    "volume": float(item["v"]),
-                })
-
-            return {
-                "symbol": symbol.upper(),
-                "interval": "5min",
-                "candles": candles,
-                "data_source": "polygon",
-            }
-
-    except Exception as e:
-        logger.warning(f"Polygon failed: {e}")
-
-    # ---------- YAHOO (FALLBACK CLEANED) ----------
+    # ---------- YAHOO (FALLBACK) ----------
     try:
         yahoo_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}?interval=1d&range=1mo"
+
+        from datetime import datetime
 
         async with httpx.AsyncClient(timeout=10.0) as client_http:
             response = await client_http.get(yahoo_url)
@@ -472,14 +429,14 @@ try:
     except Exception as e:
         logger.warning(f"Yahoo failed: {e}")
 
-    # ---------- FINAL ----------
+    # final fallback if everything fails
     return {
         "symbol": symbol.upper(),
         "interval": interval,
         "candles": [],
         "data_source": "none",
     }
-    
+
 # ==================== BACKTEST ENGINE ====================
 
 def run_backtest(
@@ -991,31 +948,3 @@ async def get_symbols():
             {"symbol": "NVDA", "name": "NVIDIA"},
         ]
     }
-
-
-# ==================== SETTINGS ====================
-
-@api_router.get("/settings")
-async def get_settings(user: dict = Depends(get_current_user)):
-    user_full = await db.users.find_one({"id": user["id"]}, {"_id": 0})
-
-    return user_full.get(
-        "settings",
-        {
-            "fast_ema": 20,
-            "mid_ema": 50,
-            "slow_ema": 200,
-            "strategy_enabled": False,
-        },
-    )
-
-
-@api_router.put("/settings")
-async def update_settings(data: dict, user: dict = Depends(get_current_user)):
-    await db.users.update_one(
-        {"id": user["id"]},
-        {"$set": {"settings": data}},
-    )
-    return {"message": "Settings updated"}
-    
-app.include_router(api_router)
