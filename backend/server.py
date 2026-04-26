@@ -947,3 +947,5 @@ async def get_symbols():
             {"symbol": "NVDA", "name": "NVIDIA"},
         ]
     }
+
+app.include_router(api_router)
