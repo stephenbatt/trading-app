@@ -375,7 +375,52 @@ async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any
     except Exception as e:
         logger.warning(f"Polygon failed: {e}")
 
-    # ---------- YAHOO (FALLBACK) ----------
+  # ---------- YAHOO (FALLBACK) ----------
+try:
+    yahoo_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}?interval=1d&range=1mo"
+
+    async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any]:
+    from datetime import datetime
+
+    # ---------- POLYGON (INTRADAY) ----------
+    try:
+        url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/2026-04-01/2026-04-24"
+
+        params = {
+            "adjusted": "true",
+            "sort": "asc",
+            "limit": 5000,
+            "apiKey": POLYGON_API_KEY
+        }
+
+        async with httpx.AsyncClient(timeout=10.0) as client_http:
+            response = await client_http.get(url, params=params)
+            data = response.json()
+
+        if "results" in data and data["results"]:
+            candles = []
+
+            for item in data["results"]:
+                candles.append({
+                    "time": int(item["t"] / 1000),
+                    "open": float(item["o"]),
+                    "high": float(item["h"]),
+                    "low": float(item["l"]),
+                    "close": float(item["c"]),
+                    "volume": float(item["v"]),
+                })
+
+            return {
+                "symbol": symbol.upper(),
+                "interval": "5min",
+                "candles": candles,
+                "data_source": "polygon",
+            }
+
+    except Exception as e:
+        logger.warning(f"Polygon failed: {e}")
+
+    # ---------- YAHOO (FALLBACK CLEANED) ----------
     try:
         yahoo_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}?interval=1d&range=1mo"
 
@@ -388,14 +433,33 @@ async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any
         quotes = result["indicators"]["quote"][0]
 
         candles = []
+        seen_dates = set()
+
         for i in range(len(timestamps)):
+            o = quotes["open"][i]
+            h = quotes["high"][i]
+            l = quotes["low"][i]
+            c = quotes["close"][i]
+            v = quotes["volume"][i]
+            t = timestamps[i]
+
+            # skip bad rows
+            if o is None or h is None or l is None or c is None:
+                continue
+
+            # remove duplicate days
+            date_str = datetime.fromtimestamp(t).strftime("%Y-%m-%d")
+            if date_str in seen_dates:
+                continue
+            seen_dates.add(date_str)
+
             candles.append({
-                "time": timestamps[i],
-                "open": quotes["open"][i],
-                "high": quotes["high"][i],
-                "low": quotes["low"][i],
-                "close": quotes["close"][i],
-                "volume": quotes["volume"][i],
+                "time": t,
+                "open": float(o),
+                "high": float(h),
+                "low": float(l),
+                "close": float(c),
+                "volume": float(v) if v else 0,
             })
 
         return {
