@@ -948,4 +948,10 @@ async def get_symbols():
         ]
     }
 
+# ---------- ROOT TEST ----------
+@app.get("/")
+async def root():
+    return {"status": "running"}
+
+# ---------- CONNECT ROUTES ----------
 app.include_router(api_router)
