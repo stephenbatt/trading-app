@@ -681,7 +681,7 @@ async def get_me(user: dict = Depends(get_current_user)):
 @api_router.get("/stocks/{symbol}")
 async def get_stock_data(
     symbol: str,
-    interval: str = "daily",
+    interval: str = "5min",
     user: dict = Depends(get_current_user),
 ):
     try:
@@ -708,7 +708,7 @@ async def get_stock_data(
         }
 
     except Exception as e:
-        print("⚠ Stock route crashed — returning fallback")
+        print("⚠ STOCK ROUTE FAILED:", e)
 
         return {
             "symbol": symbol.upper(),
@@ -753,7 +753,7 @@ async def get_indicators(
         }
 
     except Exception as e:
-        print("⚠ Indicators crashed — returning safe fallback")
+        print("⚠ INDICATORS FAILED:", e)
 
         return {
             "symbol": symbol.upper(),
