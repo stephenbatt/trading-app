@@ -356,7 +356,14 @@ async def fetch_stock_data(symbol: str, interval: str = "5min"):
         data = response.json()
 
     if "results" not in data or not data["results"]:
-        raise HTTPException(status_code=500, detail=f"POLYGON FAILED: {data}")
+        print("⚠ Polygon failed — using sample data")
+
+        return {
+            "symbol": symbol.upper(),
+            "interval": interval,
+            "candles": generate_sample_stock_data(symbol),
+            "data_source": "sample"
+        }
 
     candles = []
 
@@ -372,7 +379,7 @@ async def fetch_stock_data(symbol: str, interval: str = "5min"):
 
     return {
         "symbol": symbol.upper(),
-        "interval": "5min",
+        "interval": interval,
         "candles": candles,
         "data_source": "polygon"
     }
