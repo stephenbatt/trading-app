@@ -377,6 +377,12 @@ async def fetch_stock_data(symbol: str, interval: str = "5min"):
         "data_source": "polygon"
     }
 
+
+# ✅ THIS MUST BE OUTSIDE THE FUNCTION (NO INDENT)
+@api_router.get("/candles/{symbol}")
+async def get_candles(symbol: str):
+    return await fetch_stock_data(symbol)
+
     # ---------- YAHOO (FALLBACK) ----------
     try:
         yahoo_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}?interval=1d&range=1mo"
