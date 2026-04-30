@@ -31,13 +31,13 @@ const Candlestick = (props) => {
   const lowY = yAxisScale(low);
   
   // Body dimensions - THICK bodies
-  const bodyWidth = Math.max(width * 0.85, 6);
+  const bodyWidth = Math.max(width * 0.5, 2);
   const bodyX = x + (width - bodyWidth) / 2;
   const bodyTop = Math.min(openY, closeY);
   const bodyHeight = Math.max(Math.abs(closeY - openY), 1);
   
   // Wick position - THIN wicks
-  const wickX = x + width / 2;
+  const wickX = x + width * 0.5;
 
   return (
     <g>
