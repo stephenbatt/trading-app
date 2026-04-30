@@ -682,7 +682,6 @@ async def get_me(user: dict = Depends(get_current_user)):
 async def get_stock_data(
     symbol: str,
     interval: str = "5min",
-    user: dict = Depends(get_current_user),
 ):
     try:
         data = await fetch_stock_data(symbol.upper(), interval)
@@ -725,8 +724,8 @@ async def get_indicators(
     mid_ema: int = 50,
     slow_ema: int = 200,
     interval: str = "5min",
-    user: dict = Depends(get_current_user),
 ):
+    
     try:
         data = await fetch_stock_data(symbol.upper(), interval)
         candles = data["candles"]
