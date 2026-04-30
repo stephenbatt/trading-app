@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { stocks, paperTrades, settings as settingsApi } from '../lib/api';
 import Layout from '../components/Layout';
-import TradingChart from '../components/CandlestickChart';
+import TradingChart from '../components/TradingViewChart';
 import CCIChart from '../components/CCIChart';
 import MACDChart from '../components/MACDChart';
 import { Button } from '../components/ui/button';
@@ -12,8 +12,8 @@ import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Skeleton } from '../components/ui/skeleton';
-import { 
-  RefreshCw, 
+import {
+  RefreshCw,
   TrendingUp, 
   TrendingDown, 
   Activity,
