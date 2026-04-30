@@ -333,47 +333,49 @@ def generate_sample_stock_data(symbol: str, days: int = 300) -> List[Dict[str, A
 # ==================== ALPHA VANTAGE ====================
 
 ALPHA_VANTAGE_KEY = os.environ.get("ALPHA_VANTAGE_KEY", "demo")
-
-
 POLYGON_API_KEY = os.environ.get("POLYGON_API_KEY")
 
-async def fetch_stock_data(symbol: str, interval: str = "5min") -> Dict[str, Any]:
-    # ---------- POLYGON (INTRADAY) ----------
-    try:
-        url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/2026-04-01/2026-04-24"
+from datetime import datetime, timedelta
 
-        params = {
-            "adjusted": "true",
-            "sort": "asc",
-            "limit": 5000,
-            "apiKey": POLYGON_API_KEY
-        }
+async def fetch_stock_data(symbol: str, interval: str = "5min"):
 
-        async with httpx.AsyncClient(timeout=10.0) as client_http:
-            response = await client_http.get(url, params=params)
-            data = response.json()
+    end = datetime.utcnow()
+    start = end - timedelta(days=5)
 
-        if "results" in data and data["results"]:
-            candles = []
-            for item in data["results"]:
-                candles.append({
-                    "time": int(item["t"] / 1000),
-                    "open": float(item["o"]),
-                    "high": float(item["h"]),
-                    "low": float(item["l"]),
-                    "close": float(item["c"]),
-                    "volume": float(item["v"]),
-                })
+    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/{start.date()}/{end.date()}"
 
-            return {
-                "symbol": symbol.upper(),
-                "interval": "5min",
-                "candles": candles,
-                "data_source": "polygon",
-            }
+    params = {
+        "adjusted": "true",
+        "sort": "asc",
+        "limit": 5000,
+        "apiKey": POLYGON_API_KEY
+    }
 
-    except Exception as e:
-        logger.warning(f"Polygon failed: {e}")
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.get(url, params=params)
+        data = response.json()
+
+    if "results" not in data or not data["results"]:
+        raise HTTPException(status_code=500, detail=f"POLYGON FAILED: {data}")
+
+    candles = []
+
+    for item in data["results"]:
+        candles.append({
+            "time": int(item["t"] / 1000),
+            "open": float(item["o"]),
+            "high": float(item["h"]),
+            "low": float(item["l"]),
+            "close": float(item["c"]),
+            "volume": float(item["v"]),
+        })
+
+    return {
+        "symbol": symbol.upper(),
+        "interval": "5min",
+        "candles": candles,
+        "data_source": "polygon"
+    }
 
     # ---------- YAHOO (FALLBACK) ----------
     try:
