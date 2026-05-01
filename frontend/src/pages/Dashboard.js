@@ -254,29 +254,41 @@ useEffect(() => {
         </div>
 
         {/* Top Controls - STOCK PICKER */}
-        <Card className="bg-zinc-900 border-zinc-800">
-          <CardContent className="p-3">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                {/* Symbol Selector - Made Prominent */}
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm text-zinc-400 font-medium">Pick Stock:</Label>
-                  <Select value={symbol} onValueChange={setSymbol}>
-                    <SelectTrigger className="w-[220px] bg-zinc-800 border-zinc-600 text-white font-mono text-lg" data-testid="symbol-selector">
-                      <SelectValue placeholder="Select a stock" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-800 border-zinc-700 max-h-[300px]">
-                      {symbols.map((s) => (
-                        <SelectItem key={s.symbol} value={s.symbol} className="text-white hover:bg-zinc-700 py-2">
-                          <div className="flex items-center gap-3">
-                            <span className="font-mono font-bold text-green-400">{s.symbol}</span>
-                            <span className="text-zinc-400 text-sm">{s.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+<Card className="bg-zinc-900 border-zinc-800">
+  <CardContent className="p-3">
+    <div className="flex flex-wrap items-center justify-between gap-4">
+
+      <div className="flex items-center gap-4">
+
+        {/* Symbol Input */}
+        <div className="flex items-center gap-2">
+          <Label className="text-sm text-zinc-400 font-medium">
+            Pick Stock:
+          </Label>
+
+          <input
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleRefresh();
+            }}
+            placeholder="Type stock (AAPL, TSLA, SPY...)"
+            className="w-[220px] bg-zinc-800 border border-zinc-600 text-white font-mono text-lg px-3 py-2 rounded-md"
+          />
+
+          <Button
+            onClick={handleRefresh}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Load
+          </Button>
+        </div>
+
+      </div>
+
+    </div>
+  </CardContent>
+</Card>
 
                 <Button
                   variant="outline"
