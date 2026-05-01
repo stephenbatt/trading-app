@@ -1,4 +1,3 @@
-```jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { stocks, paperTrades, settings as settingsApi } from '../lib/api';
 import Layout from '../components/Layout';
