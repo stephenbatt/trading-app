@@ -961,10 +961,23 @@ async def get_symbols():
         ]
     }
 
+# ==================== SETTINGS ====================
+
+@api_router.get("/settings")
+async def get_settings():
+    return {
+        "fast_ema": 20,
+        "mid_ema": 50,
+        "slow_ema": 200,
+        "strategy_enabled": False
+    }
+
+
 # ---------- ROOT TEST ----------
 @app.get("/")
 async def root():
     return {"status": "running"}
+
 
 # ---------- CONNECT ROUTES ----------
 app.include_router(api_router)
