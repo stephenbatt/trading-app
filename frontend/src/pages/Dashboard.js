@@ -99,17 +99,7 @@ const fetchStockData = useCallback(async () => {
     };
     fetchSettings();
   }, []);
-
-  // Fetch stock data
-  const fetchStockData = useCallback(async () => {
-  try {
-    const response = await stocks.getIndicators(symbol, {
-      fast_ema: userSettings.fast_ema,
-      mid_ema: userSettings.mid_ema,
-      slow_ema: userSettings.slow_ema,
-      interval: interval, // ✅ FIXED
-    });
-
+  
     setStockData(response.data);
   } catch (error) {
     console.error('Failed to fetch stock data:', error);
