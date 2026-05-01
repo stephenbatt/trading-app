@@ -289,17 +289,7 @@ useEffect(() => {
     </div>
   </CardContent>
 </Card>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleRefresh}
-                  disabled={refreshing}
-                  className="border-zinc-600"
-                  data-testid="refresh-button"
-                >
-                  <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                </Button>
+              
               </div>
 
               {/* Strategy Toggle */}
