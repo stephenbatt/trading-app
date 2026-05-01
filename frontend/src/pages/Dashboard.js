@@ -56,16 +56,6 @@ const fetchStockData = useCallback(async () => {
       interval: interval,
     });
 
-    setStockData(response.data);
-  } catch (error) {
-    console.error('Failed to fetch stock data:', error);
-    toast.error('Failed to load stock data');
-  } finally {
-    setLoading(false);
-    setRefreshing(false);
-  }
-}, [symbol, userSettings, interval]);
-
   // Calculate P&L stats
   const closedTrades = allTrades.filter(t => t.status === 'closed');
   const totalPnL = closedTrades.reduce((sum, t) => sum + (t.profit_loss || 0), 0);
