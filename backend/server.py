@@ -451,7 +451,130 @@ async def get_candles(symbol: str):
         "candles": [],
         "data_source": "none",
     }
+# ==================== STOCK DATA ROUTES ====================
 
+@api_router.get("/stocks/{symbol}")
+async def get_stock_data(
+    symbol: str,
+    interval: str = "5min",
+):
+    try:
+        data = await fetch_stock_data(symbol.upper(), interval)
+        candles = data["candles"]
+
+        if not candles:
+            raise Exception("No data")
+
+        fast_ema = 20
+        mid_ema = 50
+        slow_ema = 200
+
+        closes = [c["close"] for c in candles]
+        highs = [c["high"] for c in candles]
+        lows = [c["low"] for c in candles]
+
+        fast_vals = calculate_ema(closes, fast_ema)
+        mid_vals = calculate_ema(closes, mid_ema)
+        slow_vals = calculate_ema(closes, slow_ema)
+
+        cci_vals = calculate_cci(highs, lows, closes, 20)
+        macd_vals = calculate_macd(closes)
+
+        for i, candle in enumerate(candles):
+            candle["fast_ema"] = round(fast_vals[i], 4) if fast_vals[i] else None
+            candle["mid_ema"] = round(mid_vals[i], 4) if mid_vals[i] else None
+            candle["slow_ema"] = round(slow_vals[i], 4) if slow_vals[i] else None
+            candle["cci"] = round(cci_vals[i], 2) if cci_vals[i] else None
+            candle["macd_histogram"] = (
+                round(macd_vals["histogram"][i], 4)
+                if macd_vals["histogram"][i]
+                else None
+            )
+
+        return {
+            "symbol": symbol.upper(),
+            "interval": interval,
+            "candles": candles,
+            "ema_settings": {
+                "fast_ema": fast_ema,
+                "mid_ema": mid_ema,
+                "slow_ema": slow_ema,
+            },
+        }
+
+    except Exception as e:
+        print("⚠ STOCK ROUTE FAILED:", e)
+
+        return {
+            "symbol": symbol.upper(),
+            "interval": interval,
+            "candles": [],
+            "ema_settings": {"fast_ema": 20, "mid_ema": 50, "slow_ema": 200},
+        }
+
+
+@api_router.get("/stocks/{symbol}/indicators")
+async def get_indicators(
+    symbol: str,
+    fast_ema: int = 20,
+    mid_ema: int = 50,
+    slow_ema: int = 200,
+    interval: str = "5min",
+):
+    try:
+        data = await fetch_stock_data(symbol.upper(), interval)
+        candles = data["candles"]
+
+        if not candles:
+            raise Exception("No data")
+
+        closes = [c["close"] for c in candles]
+        highs = [c["high"] for c in candles]
+        lows = [c["low"] for c in candles]
+
+        fast_vals = calculate_ema(closes, fast_ema)
+        mid_vals = calculate_ema(closes, mid_ema)
+        slow_vals = calculate_ema(closes, slow_ema)
+
+        cci_vals = calculate_cci(highs, lows, closes, 20)
+        macd_vals = calculate_macd(closes)
+
+        for i, candle in enumerate(candles):
+            candle["fast_ema"] = round(fast_vals[i], 4) if fast_vals[i] else None
+            candle["mid_ema"] = round(mid_vals[i], 4) if mid_vals[i] else None
+            candle["slow_ema"] = round(slow_vals[i], 4) if slow_vals[i] else None
+            candle["cci"] = round(cci_vals[i], 2) if cci_vals[i] else None
+            candle["macd_histogram"] = (
+                round(macd_vals["histogram"][i], 4)
+                if macd_vals["histogram"][i]
+                else None
+            )
+
+        return {
+            "symbol": symbol.upper(),
+            "interval": interval,
+            "candles": candles,
+            "ema_settings": {
+                "fast_ema": fast_ema,
+                "mid_ema": mid_ema,
+                "slow_ema": slow_ema,
+            },
+        }
+
+    except Exception as e:
+        print("⚠ INDICATORS FAILED:", e)
+
+        return {
+            "symbol": symbol.upper(),
+            "interval": interval,
+            "candles": [],
+            "ema_settings": {
+                "fast_ema": fast_ema,
+                "mid_ema": mid_ema,
+                "slow_ema": slow_ema,
+            },
+        }
+        
 # ==================== BACKTEST ENGINE ====================
 
 def run_backtest(
@@ -676,8 +799,6 @@ async def get_me(user: dict = Depends(get_current_user)):
         created_at=user["created_at"],
     )
 
-# ==================== STOCK DATA ROUTES ====================
-
 @api_router.get("/stocks/{symbol}")
 async def get_stock_data(
     symbol: str,
@@ -690,20 +811,42 @@ async def get_stock_data(
         if not candles:
             raise Exception("No data")
 
-        settings = {"fast_ema": 20, "mid_ema": 50, "slow_ema": 200}
+        # Default settings
+        fast_ema = 20
+        mid_ema = 50
+        slow_ema = 200
 
-        for candle in candles:
-            candle["fast_ema"] = candle["close"]
-            candle["mid_ema"] = candle["close"]
-            candle["slow_ema"] = candle["close"]
-            candle["cci"] = 0
-            candle["macd_histogram"] = 0
+        closes = [c["close"] for c in candles]
+        highs = [c["high"] for c in candles]
+        lows = [c["low"] for c in candles]
+
+        fast_vals = calculate_ema(closes, fast_ema)
+        mid_vals = calculate_ema(closes, mid_ema)
+        slow_vals = calculate_ema(closes, slow_ema)
+
+        cci_vals = calculate_cci(highs, lows, closes, 20)
+        macd_vals = calculate_macd(closes)
+
+        for i, candle in enumerate(candles):
+            candle["fast_ema"] = round(fast_vals[i], 4) if fast_vals[i] else None
+            candle["mid_ema"] = round(mid_vals[i], 4) if mid_vals[i] else None
+            candle["slow_ema"] = round(slow_vals[i], 4) if slow_vals[i] else None
+            candle["cci"] = round(cci_vals[i], 2) if cci_vals[i] else None
+            candle["macd_histogram"] = (
+                round(macd_vals["histogram"][i], 4)
+                if macd_vals["histogram"][i]
+                else None
+            )
 
         return {
             "symbol": symbol.upper(),
             "interval": interval,
             "candles": candles,
-            "ema_settings": settings,
+            "ema_settings": {
+                "fast_ema": fast_ema,
+                "mid_ema": mid_ema,
+                "slow_ema": slow_ema,
+            },
         }
 
     except Exception as e:
@@ -714,55 +857,6 @@ async def get_stock_data(
             "interval": interval,
             "candles": [],
             "ema_settings": {"fast_ema": 20, "mid_ema": 50, "slow_ema": 200},
-        }
-
-
-@api_router.get("/stocks/{symbol}/indicators")
-async def get_indicators(
-    symbol: str,
-    fast_ema: int = 20,
-    mid_ema: int = 50,
-    slow_ema: int = 200,
-    interval: str = "5min",
-):
-    
-    try:
-        data = await fetch_stock_data(symbol.upper(), interval)
-        candles = data["candles"]
-
-        if not candles:
-            raise Exception("No data")
-
-        for candle in candles:
-            candle["fast_ema"] = candle["close"]
-            candle["mid_ema"] = candle["close"]
-            candle["slow_ema"] = candle["close"]
-            candle["cci"] = 0
-            candle["macd_histogram"] = 0
-
-        return {
-            "symbol": symbol.upper(),
-            "interval": interval,
-            "candles": candles,
-            "ema_settings": {
-                "fast_ema": fast_ema,
-                "mid_ema": mid_ema,
-                "slow_ema": slow_ema,
-            },
-        }
-
-    except Exception as e:
-        print("⚠ INDICATORS FAILED:", e)
-
-        return {
-            "symbol": symbol.upper(),
-            "interval": interval,
-            "candles": [],
-            "ema_settings": {
-                "fast_ema": fast_ema,
-                "mid_ema": mid_ema,
-                "slow_ema": slow_ema,
-            },
         }
         
 # ==================== BACKTEST ROUTES ====================
