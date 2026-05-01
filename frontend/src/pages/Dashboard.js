@@ -212,14 +212,5 @@ const Dashboard = () => {
     ? ((currentCandle.close - prevCandle.close) / prevCandle.close) * 100
     : 0;
 
-  return (
-    <Layout>
-      <div className="p-4 text-white">
-        Dashboard repaired successfully.
-      </div>
-    </Layout>
-  );
-};
-
 export default Dashboard;
 
