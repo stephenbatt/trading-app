@@ -30,6 +30,7 @@ import { formatPrice, formatPercent, getPriceChangeColor } from '../lib/utils';
 
 const Dashboard = () => {
   const [symbol, setSymbol] = useState('AAPL');
+  const [interval, setInterval] = useState('5min');
   const [symbols, setSymbols] = useState([]);
   const [stockData, setStockData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,6 +46,25 @@ const Dashboard = () => {
   const [tradingQuantity, setTradingQuantity] = useState(10);
   const [placingTrade, setPlacingTrade] = useState(false);
   const [bankroll, setBankroll] = useState(10000); // Starting bankroll
+
+const fetchStockData = useCallback(async () => {
+  try {
+    const response = await stocks.getIndicators(symbol, {
+      fast_ema: userSettings.fast_ema,
+      mid_ema: userSettings.mid_ema,
+      slow_ema: userSettings.slow_ema,
+      interval: interval,
+    });
+
+    setStockData(response.data);
+  } catch (error) {
+    console.error('Failed to fetch stock data:', error);
+    toast.error('Failed to load stock data');
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+}, [symbol, userSettings, interval]);
 
   // Calculate P&L stats
   const closedTrades = allTrades.filter(t => t.status === 'closed');
@@ -84,11 +104,12 @@ const Dashboard = () => {
   const fetchStockData = useCallback(async () => {
   try {
     const response = await stocks.getIndicators(symbol, {
-  fast_ema: userSettings.fast_ema,
-  mid_ema: userSettings.mid_ema,
-  slow_ema: userSettings.slow_ema,
-  interval: '5min'
-});
+      fast_ema: userSettings.fast_ema,
+      mid_ema: userSettings.mid_ema,
+      slow_ema: userSettings.slow_ema,
+      interval: interval, // ✅ FIXED
+    });
+
     setStockData(response.data);
   } catch (error) {
     console.error('Failed to fetch stock data:', error);
@@ -97,7 +118,7 @@ const Dashboard = () => {
     setLoading(false);
     setRefreshing(false);
   }
-}, [symbol, userSettings]);
+}, [symbol, userSettings, interval]); // ✅ ADD interval here
   
 useEffect(() => {
   fetchStockData();
@@ -107,7 +128,7 @@ useEffect(() => {
   }, 30000);
 
   return () => clearInterval(intervalId);
-}, [fetchStockData]);
+}, [fetchStockData, interval]);
   
   // Fetch open trades
   useEffect(() => {
