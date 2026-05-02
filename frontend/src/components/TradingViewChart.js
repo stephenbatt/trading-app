@@ -9,52 +9,59 @@ const TradingViewChart = ({ data }) => {
     if (!chartRef.current) return;
 
     // ✅ Create chart ONLY once
-    if (!chartInstance.current) {
-      chartInstance.current = window.LightweightCharts.createChart(
-        chartRef.current,
-        {
-          width: chartRef.current.clientWidth,
-          height: 400,
-          layout: {
-            background: { color: "#131722" },
-            textColor: "#d1d5db",
-          },
-        }
-      );
+if (!chartInstance.current) {
 
-      // ✅ Candlestick Series
-      seriesRef.current = chartInstance.current.addSeries(
-        window.LightweightCharts.CandlestickSeries
-      );
+  chartInstance.current = window.LightweightCharts.createChart(
+    chartRef.current,
+    {
+      width: chartRef.current.clientWidth,
+      height: 400,
 
-      // ✅ EMA Line Series
-      chartInstance.current.fastEMARef =
-        chartInstance.current.addSeries(
-          window.LightweightCharts.LineSeries,
-          {
-            color: "#f59e0b",
-            lineWidth: 1,
-          }
-        );
+      layout: {
+        background: { color: "#131722" },
+        textColor: "#d1d5db",
+      },
 
-      chartInstance.current.midEMARef =
-        chartInstance.current.addSeries(
-          window.LightweightCharts.LineSeries,
-          {
-            color: "#a855f7",
-            lineWidth: 1,
-          }
-        );
-
-      chartInstance.current.slowEMARef =
-        chartInstance.current.addSeries(
-          window.LightweightCharts.LineSeries,
-          {
-            color: "#ec4899",
-            lineWidth: 1,
-          }
-        );
+      timeScale: {
+        barSpacing: 12,
+        rightOffset: 5,
+      },
     }
+  );
+
+  // ✅ Candlestick Series
+  seriesRef.current = chartInstance.current.addSeries(
+    window.LightweightCharts.CandlestickSeries
+  );
+
+  // ✅ EMA Line Series
+  chartInstance.current.fastEMARef =
+    chartInstance.current.addSeries(
+      window.LightweightCharts.LineSeries,
+      {
+        color: "#f59e0b",
+        lineWidth: 1,
+      }
+    );
+
+  chartInstance.current.midEMARef =
+    chartInstance.current.addSeries(
+      window.LightweightCharts.LineSeries,
+      {
+        color: "#a855f7",
+        lineWidth: 1,
+      }
+    );
+
+  chartInstance.current.slowEMARef =
+    chartInstance.current.addSeries(
+      window.LightweightCharts.LineSeries,
+      {
+        color: "#ec4899",
+        lineWidth: 1,
+      }
+    );
+}
 
     // ✅ Update data
     if (data && data.length > 0 && seriesRef.current) {
