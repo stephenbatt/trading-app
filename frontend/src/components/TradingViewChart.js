@@ -22,33 +22,41 @@ const TradingViewChart = ({ data }) => {
         }
       );
 
-      // ✅ Correct API for your version
+      // ✅ Candlestick Series
       seriesRef.current = chartInstance.current.addSeries(
         window.LightweightCharts.CandlestickSeries
       );
+
+      // ✅ EMA Line Series
+      chartInstance.current.fastEMARef =
+        chartInstance.current.addSeries(
+          window.LightweightCharts.LineSeries,
+          {
+            color: "#f59e0b",
+            lineWidth: 1,
+          }
+        );
+
+      chartInstance.current.midEMARef =
+        chartInstance.current.addSeries(
+          window.LightweightCharts.LineSeries,
+          {
+            color: "#a855f7",
+            lineWidth: 1,
+          }
+        );
+
+      chartInstance.current.slowEMARef =
+        chartInstance.current.addSeries(
+          window.LightweightCharts.LineSeries,
+          {
+            color: "#ec4899",
+            lineWidth: 1,
+          }
+        );
     }
 
-          // EMA Line Series
-      const fastEMARef = chartInstance.current.addLineSeries({
-        color: "#f59e0b",
-        lineWidth: 1,
-      });
-
-      const midEMARef = chartInstance.current.addLineSeries({
-        color: "#a855f7",
-        lineWidth: 1,
-      });
-
-      const slowEMARef = chartInstance.current.addLineSeries({
-        color: "#ec4899",
-        lineWidth: 1,
-      });
-
-      chartInstance.current.fastEMARef = fastEMARef;
-      chartInstance.current.midEMARef = midEMARef;
-      chartInstance.current.slowEMARef = slowEMARef;
-
-    // ✅ Update data (no re-creating chart)
+    // ✅ Update data
     if (data && data.length > 0 && seriesRef.current) {
       const formatted = data.map((c) => ({
         time: Number(c.time),
@@ -59,7 +67,9 @@ const TradingViewChart = ({ data }) => {
       }));
 
       seriesRef.current.setData(formatted);
-            chartInstance.current.fastEMARef.setData(
+
+      // ✅ EMA Data
+      chartInstance.current.fastEMARef.setData(
         data.map((c) => ({
           time: Number(c.time),
           value: c.fast_ema,
@@ -79,6 +89,7 @@ const TradingViewChart = ({ data }) => {
           value: c.slow_ema,
         }))
       );
+
       chartInstance.current.timeScale().fitContent();
     }
   }, [data]);
