@@ -339,10 +339,28 @@ from datetime import datetime, timedelta
 
 async def fetch_stock_data(symbol: str, interval: str = "5min"):
 
+    interval_map = {
+        "1min": (1, "minute"),
+        "5min": (5, "minute"),
+        "10min": (10, "minute"),
+        "15min": (15, "minute"),
+        "30min": (30, "minute"),
+        "1hour": (1, "hour"),
+        "1day": (1, "day"),
+        "1week": (1, "week"),
+        "1month": (1, "month"),
+    }
+
+    multiplier, timespan = interval_map.get(interval, (5, "minute"))
+
     end = datetime.utcnow()
     start = end - timedelta(days=5)
 
-    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol.upper()}/range/5/minute/{start.date()}/{end.date()}"
+    url = (
+        f"https://api.polygon.io/v2/aggs/ticker/"
+        f"{symbol.upper()}/range/{multiplier}/{timespan}/"
+        f"{start.date()}/{end.date()}"
+    )
 
     params = {
         "adjusted": "true",
@@ -350,7 +368,6 @@ async def fetch_stock_data(symbol: str, interval: str = "5min"):
         "limit": 5000,
         "apiKey": POLYGON_API_KEY
     }
-
     async with httpx.AsyncClient(timeout=10.0) as client:
         response = await client.get(url, params=params)
         data = response.json()
