@@ -28,12 +28,16 @@ import {
 import { toast } from 'sonner';
 import { formatPrice, formatPercent, getPriceChangeColor } from '../lib/utils';
 
-const Dashboard = () => {
+const Dashboard = () => { 
   const [symbol, setSymbol] = useState('AAPL');
+
+  const [interval, setIntervalValue] = useState('5min');
+
   const [symbols, setSymbols] = useState([]);
   const [stockData, setStockData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
   const [userSettings, setUserSettings] = useState({
     fast_ema: 20,
     mid_ema: 50,
@@ -87,7 +91,7 @@ const Dashboard = () => {
   fast_ema: userSettings.fast_ema,
   mid_ema: userSettings.mid_ema,
   slow_ema: userSettings.slow_ema,
-  interval: '5min'
+  interval: interval
 });
     setStockData(response.data);
   } catch (error) {
@@ -97,7 +101,7 @@ const Dashboard = () => {
     setLoading(false);
     setRefreshing(false);
   }
-}, [symbol, userSettings]);
+}, [symbol, interval, userSettings]);
   
 useEffect(() => {
   fetchStockData();
@@ -258,25 +262,74 @@ useEffect(() => {
           <CardContent className="p-3">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                {/* Symbol Selector - Made Prominent */}
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm text-zinc-400 font-medium">Pick Stock:</Label>
-                  <Select value={symbol} onValueChange={setSymbol}>
-                    <SelectTrigger className="w-[220px] bg-zinc-800 border-zinc-600 text-white font-mono text-lg" data-testid="symbol-selector">
-                      <SelectValue placeholder="Select a stock" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-800 border-zinc-700 max-h-[300px]">
-                      {symbols.map((s) => (
-                        <SelectItem key={s.symbol} value={s.symbol} className="text-white hover:bg-zinc-700 py-2">
-                          <div className="flex items-center gap-3">
-                            <span className="font-mono font-bold text-green-400">{s.symbol}</span>
-                            <span className="text-zinc-400 text-sm">{s.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Symbol + Timeframe Controls */}
+<div className="flex items-center gap-4">
+
+  {/* Stock Selector */}
+  <div className="flex items-center gap-2">
+    <Label className="text-sm text-zinc-400 font-medium">
+      Pick Stock:
+    </Label>
+
+    <Select value={symbol} onValueChange={setSymbol}>
+      <SelectTrigger
+        className="w-[220px] bg-zinc-800 border-zinc-600 text-white font-mono text-lg"
+        data-testid="symbol-selector"
+      >
+        <SelectValue placeholder="Select a stock" />
+      </SelectTrigger>
+
+      <SelectContent className="bg-zinc-800 border-zinc-700 max-h-[300px]">
+        {symbols.map((s) => (
+          <SelectItem
+            key={s.symbol}
+            value={s.symbol}
+            className="text-white hover:bg-zinc-700 py-2"
+          >
+            <div className="flex items-center gap-3">
+              <span className="font-mono font-bold text-green-400">
+                {s.symbol}
+              </span>
+              <span className="text-zinc-400 text-sm">
+                {s.name}
+              </span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Timeframe Selector */}
+  <div className="flex items-center gap-2">
+    <Label className="text-sm text-zinc-400 font-medium">
+      Timeframe:
+    </Label>
+
+    <Select value={interval} onValueChange={setIntervalValue}>
+      <SelectTrigger className="w-[140px] bg-zinc-800 border-zinc-600 text-white">
+        <SelectValue placeholder="Select timeframe" />
+      </SelectTrigger>
+
+      <SelectContent className="bg-zinc-800 border-zinc-700">
+
+        <SelectItem value="1min">1 Minute</SelectItem>
+        <SelectItem value="5min">5 Minute</SelectItem>
+        <SelectItem value="10min">10 Minute</SelectItem>
+        <SelectItem value="15min">15 Minute</SelectItem>
+
+        <SelectItem value="30min">30 Minute</SelectItem>
+        <SelectItem value="1hour">1 Hour</SelectItem>
+
+        <SelectItem value="1day">Daily</SelectItem>
+        <SelectItem value="1week">Weekly</SelectItem>
+        <SelectItem value="1month">Monthly</SelectItem>
+
+      </SelectContent>
+    </Select>
+  </div>
+
+</div>
 
                 <Button
                   variant="outline"
@@ -315,7 +368,7 @@ useEffect(() => {
                 <div className="flex items-center gap-3">
                   <h2 className="font-heading text-2xl font-bold text-white">{symbol}</h2>
                   <Badge variant="outline" className="border-zinc-700 text-zinc-400">
-                    Daily
+                    {interval}
                   </Badge>
                 </div>
                 {loading ? (
