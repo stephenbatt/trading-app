@@ -383,74 +383,7 @@ async def fetch_stock_data(symbol: str, interval: str = "5min"):
         "candles": candles,
         "data_source": "polygon"
     }
-
-
-# ✅ THIS MUST BE OUTSIDE THE FUNCTION (NO INDENT)
-@api_router.get("/candles/{symbol}")
-async def get_candles(symbol: str):
-    return await fetch_stock_data(symbol)
-
-    # ---------- YAHOO (FALLBACK) ----------
-    try:
-        yahoo_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}?interval=1d&range=1mo"
-
-        from datetime import datetime
-
-        async with httpx.AsyncClient(timeout=10.0) as client_http:
-            response = await client_http.get(yahoo_url)
-            data = response.json()
-
-        result = data["chart"]["result"][0]
-        timestamps = result["timestamp"]
-        quotes = result["indicators"]["quote"][0]
-
-        candles = []
-        seen_dates = set()
-
-        for i in range(len(timestamps)):
-            o = quotes["open"][i]
-            h = quotes["high"][i]
-            l = quotes["low"][i]
-            c = quotes["close"][i]
-            v = quotes["volume"][i]
-            t = timestamps[i]
-
-            # skip bad rows
-            if o is None or h is None or l is None or c is None:
-                continue
-
-            # remove duplicate days
-            date_str = datetime.fromtimestamp(t).strftime("%Y-%m-%d")
-            if date_str in seen_dates:
-                continue
-            seen_dates.add(date_str)
-
-            candles.append({
-                "time": t,
-                "open": float(o),
-                "high": float(h),
-                "low": float(l),
-                "close": float(c),
-                "volume": float(v) if v else 0,
-            })
-
-        return {
-            "symbol": symbol.upper(),
-            "interval": "daily",
-            "candles": candles,
-            "data_source": "yahoo",
-        }
-
-    except Exception as e:
-        logger.warning(f"Yahoo failed: {e}")
-
-    # final fallback if everything fails
-    return {
-        "symbol": symbol.upper(),
-        "interval": interval,
-        "candles": [],
-        "data_source": "none",
-    }
+    
 # ==================== STOCK DATA ROUTES ====================
 
 @api_router.get("/stocks/{symbol}")
