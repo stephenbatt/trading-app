@@ -90,7 +90,7 @@ const TradingViewChart = ({ data }) => {
         }))
       );
 
-      chartInstance.current.timeScale().fitContent();
+      // chartInstance.current.timeScale().fitContent();
     }
   }, [data]);
 
