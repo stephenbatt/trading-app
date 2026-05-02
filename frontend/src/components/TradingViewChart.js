@@ -28,6 +28,26 @@ const TradingViewChart = ({ data }) => {
       );
     }
 
+          // EMA Line Series
+      const fastEMARef = chartInstance.current.addLineSeries({
+        color: "#f59e0b",
+        lineWidth: 1,
+      });
+
+      const midEMARef = chartInstance.current.addLineSeries({
+        color: "#a855f7",
+        lineWidth: 1,
+      });
+
+      const slowEMARef = chartInstance.current.addLineSeries({
+        color: "#ec4899",
+        lineWidth: 1,
+      });
+
+      chartInstance.current.fastEMARef = fastEMARef;
+      chartInstance.current.midEMARef = midEMARef;
+      chartInstance.current.slowEMARef = slowEMARef;
+
     // ✅ Update data (no re-creating chart)
     if (data && data.length > 0 && seriesRef.current) {
       const formatted = data.map((c) => ({
@@ -39,6 +59,26 @@ const TradingViewChart = ({ data }) => {
       }));
 
       seriesRef.current.setData(formatted);
+            chartInstance.current.fastEMARef.setData(
+        data.map((c) => ({
+          time: Number(c.time),
+          value: c.fast_ema,
+        }))
+      );
+
+      chartInstance.current.midEMARef.setData(
+        data.map((c) => ({
+          time: Number(c.time),
+          value: c.mid_ema,
+        }))
+      );
+
+      chartInstance.current.slowEMARef.setData(
+        data.map((c) => ({
+          time: Number(c.time),
+          value: c.slow_ema,
+        }))
+      );
       chartInstance.current.timeScale().fitContent();
     }
   }, [data]);
