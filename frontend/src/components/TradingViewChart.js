@@ -21,6 +21,13 @@ if (!chartInstance.current) {
         background: { color: "#131722" },
         textColor: "#d1d5db",
       },
+      priceScale: {
+  autoScale: true,
+  scaleMargins: {
+    top: 0.15,
+    bottom: 0.15,
+  },
+},
 
       timeScale: {
         barSpacing: 3,
