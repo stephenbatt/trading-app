@@ -431,21 +431,29 @@ useEffect(() => {
                       {formatPercent(priceChange)}
                     </span>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-2">
-                {loading ? (
-                  <Skeleton className="h-[400px] w-full" />
-                ) : (
-                  <div data-testid="candlestick-chart" className="chart-container">
-                    <TradingChart 
-                      data={stockData?.candles || []} 
-                      height={400} 
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </div></CardHeader>
+
+<CardContent className="p-2">
+  {loading ? (
+    <Skeleton className="h-[400px] w-full" />
+  ) : (
+    <>
+      <div
+        data-testid="candlestick-chart"
+        className="chart-container"
+      >
+        <TradingChart
+          data={stockData?.candles || []}
+          height={400}
+        />
+      </div>
+
+      <TradingViewProfessional symbol={`NASDAQ:${symbol}`} />
+    </>
+  )}
+</CardContent>
+
+</Card>
 
             {/* CCI Chart */}
             <Card className="bg-zinc-900 border-zinc-800">
