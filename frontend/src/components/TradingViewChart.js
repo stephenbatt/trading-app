@@ -23,7 +23,7 @@ if (!chartInstance.current) {
       },
 
       timeScale: {
-        barSpacing: 12,
+        barSpacing: 6,
         rightOffset: 5,
       },
     }
