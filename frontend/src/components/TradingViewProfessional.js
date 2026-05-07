@@ -28,10 +28,12 @@ const TradingViewProfessional = ({ symbol = "NASDAQ:AAPL" }) => {
       allow_symbol_change: true,
 
       studies: [
-        "MACD@tv-basicstudies",
-        "CCI@tv-basicstudies",
-        "MASimple@tv-basicstudies"
-      ],
+  "MACD@tv-basicstudies",
+  "CCI@tv-basicstudies",
+  "Moving Average Exponential@tv-basicstudies",
+  "Moving Average Exponential@tv-basicstudies",
+  "Moving Average Exponential@tv-basicstudies"
+],
 
       support_host: "https://www.tradingview.com",
     });
