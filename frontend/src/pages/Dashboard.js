@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { stocks, paperTrades, settings as settingsApi } from '../lib/api';
 import Layout from '../components/Layout';
-import TradingChart from '../components/TradingViewChart';
-import TradingViewProfessional from '../components/TradingViewProfessional';
+import TradingChart from '../components/TradingChart';
 import CCIChart from '../components/CCIChart';
 import MACDChart from '../components/MACDChart';
 import { Button } from '../components/ui/button';
@@ -447,8 +446,7 @@ useEffect(() => {
           height={400}
         />
       </div>
-
-      <TradingViewProfessional symbol={`NASDAQ:${symbol}`} />
+            
     </>
   )}
 </CardContent>
