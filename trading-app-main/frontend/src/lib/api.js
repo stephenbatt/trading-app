@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 // Use the correct environment variable
-const API_BASE = 'https://trading-app-production-8850.up.railway.app/api';
-
+const API_BASE = 'https://trading-app-2gir.onrender.com/api';
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE,
