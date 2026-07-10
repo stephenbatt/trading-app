@@ -1267,7 +1267,5 @@ async def auto_trade_loop():
 
 @app.on_event("startup")
 async def start_background_tasks():
-    asyncio.create_task(auto_trade_loop())
-
-# ---------- CONNECT ROUTES ----------
-app.include_router(api_router)
+    logger.info("Auto-trade loop disabled while app is under development")
+    return
