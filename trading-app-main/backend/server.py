@@ -783,31 +783,18 @@ async def process_user_auto_trade(user_doc: Dict[str, Any]):
 @api_router.post("/auto-trade/tick")
 async def auto_trade_tick(x_tick_secret: Optional[str] = Header(default=None, alias="X-Tick-Secret")):
     if TICK_SECRET and x_tick_secret != TICK_SECRET:
-        raise HTTPException(status_code=401, detail="Invalid tick secret")
+        raise HTTPException(status_code=401, detail="unauthorized")
     if not is_within_trading_window():
-        now = datetime.now(MARKET_TZ)
-        return {
-            "status": "sleeping",
-            "reason": "outside trading window (8:55am-4:10pm Eastern, Mon-Fri, holidays excluded)",
-            "server_time_eastern": now.strftime("%Y-%m-%d %H:%M:%S %Z"),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
-    checked = 0; errors = 0
+        return {"status": "sleeping"}
     try:
         async for user_doc in db.users.find({"settings.strategy_enabled": True}, {"_id": 0}):
-            checked += 1
             try:
                 await process_user_auto_trade(user_doc)
             except Exception as e:
-                errors += 1
                 logger.error(f"tick error user={user_doc.get('id')}: {e}")
     except Exception as e:
         logger.error(f"tick fatal: {e}")
-        return {"status": "error", "detail": str(e)}
-    return {
-        "status": "completed", "users_checked": checked, "errors": errors,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
+    return {"status": "completed"}
 
 
 app.include_router(api_router)
